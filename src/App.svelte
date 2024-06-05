@@ -17,10 +17,10 @@
 
 
 <aside class="fixed top-0 left-0 z-40 w-60 h-screen">
-<div>
+<div class="bg-light-gray overflow-y-auto py-5 px-3 h-full border-r border-gray-200">
   <ul>
     <li>
-      Hello
+      <button class="bg-dark-grey py-2 px-3 text-gray-900 rounded-lg">Page Title</button>
     </li>
   </ul>
 
@@ -35,5 +35,11 @@
 </main>
 
 <style>
+.bg-light-gray {
+  background-color: #FBFBFB;
+}
 
+.bg-dark-grey {
+  background-color: #EFEFEF;
+}
 </style>
