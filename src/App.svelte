@@ -65,6 +65,7 @@
   }
 </script>
 
+<<<<<<< HEAD
 <aside class="fixed top-0 left-0 z-40 w-60 h-screen">
   <div class="bg-light-gray overflow-y-auto py-5 px-3 h-full border-r border-gray-200">
     <ul class="space-y-2">
@@ -87,6 +88,10 @@
   </div>
   <hr/>
   <textarea class="mt-3 block w-full bg-gray-50 border border-gray-300 rounded-lg text-gray-900 p-2.5" bind:value={note}></textarea>
+=======
+<main>
+  Hello World!
+>>>>>>> 5b82e617a6c57e099e24f5691e28c001eeb48680
 </main>
 
 <style>
@@ -94,7 +99,10 @@
     background: #FBFBFB;
   }
 
+<<<<<<< HEAD
   .bg-dark-gray {
     background: #EFEFEF;
   }
+=======
+>>>>>>> 5b82e617a6c57e099e24f5691e28c001eeb48680
 </style>
