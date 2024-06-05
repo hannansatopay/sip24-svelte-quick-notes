@@ -70,3 +70,11 @@ Contributions are welcome! If you'd like to contribute to this project, please f
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contact
+Landing Page - Design By Manoj R Gupta
+Mail Id:- manoj.gupta16539@sakec.ac.in
+#SocialMedia
+- [GitHub](https://github.com/Manojgupta103)
+- [LinkedIn](https://www.linkedin.com/in/manoj-ramashish-gupta/)
+- [Portfolio](https://manojgupta103.w3spaces.com/)
