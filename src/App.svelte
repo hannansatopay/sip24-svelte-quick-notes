@@ -3,7 +3,7 @@
 </script>
 
 <main>
-  this is joel
+  Hello World!
 </main>
 
 <style>
