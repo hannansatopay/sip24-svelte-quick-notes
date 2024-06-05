@@ -1,70 +1,91 @@
 <script>
   import { onMount } from 'svelte';
+  import { openDB } from 'idb';
 
+  let db;
   let pages = [];
   let currentPageIndex = 0;
   let title = 'New Note';
   let note = 'Good day';
 
-  onMount(() => {
-    const savedPages = localStorage.getItem("pages");
+  onMount(async () => {
+    // Open the IndexedDB database
+    db = await openDB('notes-db', 1, {
+      upgrade(db) {
+        // Create an object store named 'notes'
+        db.createObjectStore('notes');
+      }
+    });
+
+    // Load pages from IndexedDB
+    const tx = db.transaction('notes', 'readonly');
+    const store = tx.objectStore('notes');
+    const savedPages = await store.get('pages');
+
     if (savedPages) {
-      pages = JSON.parse(savedPages);
+      pages = savedPages;
       if (pages.length > 0) {
         title = pages[currentPageIndex];
-        note = localStorage.getItem(title);
+        note = await store.get(title);
       }
     } else {
       addPage();
     }
   });
 
-  function saveNote() {
+  async function saveNote() {
     const storedPageName = pages[currentPageIndex];
-    if (storedPageName != title) {
-      localStorage.removeItem(storedPageName);
+    if (storedPageName !== title) {
+      await db.transaction('notes', 'readwrite').objectStore('notes').delete(storedPageName);
       pages[currentPageIndex] = title;
     }
-    localStorage.setItem(title, note);
-    localStorage.setItem("pages", JSON.stringify(pages));
+    await db.transaction('notes', 'readwrite').objectStore('notes').put(note, title);
+    await db.transaction('notes', 'readwrite').objectStore('notes').put(pages, 'pages');
   }
 
-  function addPage() {
+  async function addPage() {
     pages.push("New Page");
-    selectPage(pages.length ? pages.length - 1 : 0);
+    await selectPage(pages.length ? pages.length - 1 : 0);
   }
 
-  function selectPage(index) {
+  async function selectPage(index) {
     currentPageIndex = index;
     title = pages[currentPageIndex];
-    note = localStorage.getItem(title) || '';
+    const noteData = await db.transaction('notes').objectStore('notes').get(title);
+    note = noteData || '';
   }
 
-  function deleteNote() {
+  async function deleteNote() {
     const noteToDelete = pages[currentPageIndex];
-    localStorage.removeItem(noteToDelete);
+    await db.transaction('notes', 'readwrite').objectStore('notes').delete(noteToDelete);
     pages.splice(currentPageIndex, 1);
     if (pages.length > 0) {
-      selectPage(0);
+      await selectPage(0);
     } else {
       title = '';
       note = '';
       currentPageIndex = 0;
     }
-    localStorage.setItem("pages", JSON.stringify(pages));
+    await db.transaction('notes', 'readwrite').objectStore('notes').put(pages, 'pages');
   }
 
-  function clearNotes() {
-    pages.forEach(page => {
-      localStorage.removeItem(page);
+  async function clearNotes() {
+    const tx = db.transaction('notes', 'readwrite');
+    const store = tx.objectStore('notes');
+
+    pages.forEach(async page => {
+      await store.delete(page);
     });
+
     pages = [];
     title = '';
     note = '';
     currentPageIndex = 0;
-    localStorage.removeItem("pages");
+
+    await store.delete('pages');
   }
 </script>
+
 
 <aside class="fixed top-0 left-0 z-40 w-60 h-screen">
   <div class="bg-light-blue overflow-y-auto py-5 px-3 h-full border-r border-gray-500">
@@ -97,6 +118,6 @@
     background-color: rgb(82, 144, 239);
   }
   .bg-dark-blue {
-    background-color: rgb(7, 35, 77);
+    background-color: rgb(57, 101, 168);
   }
 </style>
