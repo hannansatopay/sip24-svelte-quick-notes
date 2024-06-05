@@ -11,7 +11,7 @@
     if (savedPages) {
       pages = JSON.parse(savedPages);
       title = pages[currentPageIndex];
-      note = localStorage.getItem(title);
+      note = localStorage.getItem(title) || '';
     } else {
       addPage();
     }
@@ -29,13 +29,13 @@
 
   function addPage() {
     pages.push("New Page");
-    selectPage(pages.length ? pages.length - 1 : 0);
+    selectPage(pages.length - 1);
   }
 
   function selectPage(index) {
     currentPageIndex = index;
     title = pages[currentPageIndex];
-    note = localStorage.getItem(title);
+    note = localStorage.getItem(title) || '';
   }
 
   function deletePage() {
@@ -49,6 +49,14 @@
     } else {
       selectPage(currentPageIndex > 0 ? currentPageIndex - 1 : 0);
     }
+
+    alert('Note deleted');
+  }
+
+  function clearNote() {
+    note = '';
+    localStorage.setItem(title, note);
+    alert('Note content cleared');
   }
 </script>
 
@@ -72,6 +80,7 @@
     <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}></h1>
     <div class="ml-auto flex space-x-2">
       <button class="bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-900" on:click={saveNote}>Save</button>
+      <button class="bg-red-600 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-red-700" on:click={clearNote}>Clear</button>
       <button class="bg-red-600 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-red-700" on:click={deletePage}>Delete</button>
     </div>
   </div>
