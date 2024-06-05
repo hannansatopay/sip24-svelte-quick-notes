@@ -1,16 +1,72 @@
-We are excited to welcome you to the Svelte Fundamentals course, a key part of the Summer Internship Program 2024. In this tutorial, you'll learn the basics of Svelte by building a simple note application. This project will help you understand the core concepts of Svelte while creating a functional quick notes app.
+# Note App
 
-## How to Contribute
-1. Fork the repository specified for the Svelte projects.
-2. Clone the forked repository to your local machine.
-3. Create a new branch with your name.
-4. Implement the quick notes app by following the tutorial.
-5. Commit your changes and push them to your forked repository.
-6. Create a pull request to the main repository.
+This is a simple Note App built using Svelte and IndexedDB. It allows users to add, view, and delete notes, with the ability to toggle between light and dark modes for better readability.
 
-### Additional Challenge
-To enhance your learning experience and add more functionality to your project, we encourage you to take on the following challenges:
-1. Add a feature to delete notes within the application.
-2. Use IndexedDB for storing notes instead of local storage. For easier interaction with IndexedDB, consider using the Dexie.js library.
+- [Features](#Features)
+- [Technologies Used](#TechnologiesUsed)
+- [Getting Started](#GettingStarted)
+- [Video](#video)
+- [Deployment Link](#deployment-link)
+- [Contributing](#Contributing)
+- [License](#License)
+- [Contact](#Contact)
+## Features
 
-These challenges are designed to push your skills further and give you hands-on experience with more complex application features.
+- Add new notes with titles and messages.
+- View and toggle visibility of individual notes.
+- Delete notes.
+- Light and dark mode options for better user experience.
+- Responsive design for mobile and desktop usage.
+
+## Technologies Used
+
+- [Svelte](https://svelte.dev/) - JavaScript framework for building reactive web applications.
+- [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) - Client-side storage system for storing structured data in web browsers.
+- [idb](https://github.com/jakearchibald/idb) - A promise-based wrapper library for IndexedDB.
+- HTML5, CSS3 - Standard web technologies for markup and styling.
+
+## GettingStarted
+
+### Prerequisites
+
+- Node.js and npm (or yarn) installed on your machine.
+
+### Installation
+
+1. Clone the repository:
+
+   ```bash
+   git clone [https://github.com/your-username/note-app.git](https://github.com/Manojgupta103/sip24-svelte-quick-notes.git)
+   ```
+
+
+2. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+### Usage
+
+1. Start the development server:
+
+   ```bash
+   npm run dev
+   ```
+
+2. Open your web browser and navigate to [http://localhost:5173/](http://localhost:5173/)) to view the Note App.
+
+3. Add, view, and delete notes. Toggle between light and dark mode using the provided button in the header.
+
+## Video 
+
+https://github.com/Manojgupta103/sip24-svelte-quick-notes/assets/113758890/03a6038d-e7d9-4f3b-9066-daa38ef34a58
+
+
+## Contributing
+
+Contributions are welcome! If you'd like to contribute to this project, please fork the repository and submit a pull request with your proposed changes.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
