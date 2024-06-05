@@ -3,7 +3,7 @@
 </script>
 
 <main>
-  Hello World
+  <h1>Hello World</h1>
 </main>
 
 <style>
