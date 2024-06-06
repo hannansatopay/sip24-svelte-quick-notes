@@ -39,13 +39,14 @@
 
   function deleteNote(index) {
     const storedPages = localStorage.getItem("pages");
+    const storedPagesArr = JSON.parse(storedPages);
     console.log(storedPages);
     const storedPageName = pages[index];
     const beforeIndexElements = pages.slice(0, index);
     const afterIndexElements = pages.slice(index + 1);
-    if (storedPages.includes(storedPageName)) {
-      const beforeIndexStoredElements = storedPages.slice(0, index);
-      const afterIndexStoredElements = storedPages.slice(index + 1);
+    if (storedPagesArr.includes(storedPageName)) {
+      const beforeIndexStoredElements = storedPagesArr.slice(0, index);
+      const afterIndexStoredElements = storedPagesArr.slice(index + 1);
       const newStoredPages = beforeIndexStoredElements.concat(
         afterIndexStoredElements
       );
