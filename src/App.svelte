@@ -46,6 +46,23 @@
     note = localStorage.getItem(title);
   }
 
+  function deletePage(index){
+    currentPageIndex = index;
+    pages.splice(currentPageIndex, 1);
+    localStorage.removeItem(title);
+
+    if(currentPageIndex > 0){
+      currentPageIndex = index === 0 ? 0 : index - 1;
+      title = pages[currentPageIndex];
+      note = localStorage.getItem(title);
+    }else{
+      currentPageIndex = 0;
+      addPage();
+    }
+
+    localStorage.setItem("pages", JSON.stringify(pages));
+  }
+
 </script>
 
 
@@ -77,7 +94,7 @@
   <!-- <input class="block w-full rounded-xl text-gray-900 border border-gray-300 bg-gray-100 p-2.5 text-center font-bold" type="text" bind:value={title} placeholder="Add a title"> -->
   
   <textarea class="block w-full rounded-lg text-gray-900 border-gray-300 bg-gray-50 font-normal p-2.5 mt-3" bind:value={note}></textarea>
-  
+  <button class="ml-auto bg-gray-800 border-2 border-gray-800 font-medium rounded-lg px-5 py-2.5 text-sm mt-3 text-gray-100 hover:bg-gray-900" on:click={()=>deletePage(currentPageIndex)}>Delete the current page</button> 
   
 </main>
 
