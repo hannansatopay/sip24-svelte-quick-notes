@@ -79,37 +79,32 @@
   });
 </script>
 
-<aside class="fixed top-0 left-0 z-40 w-60 h-screen">
-  <div class="bg-light-gray overflow-y-auto py-5 px-3 h-full border-r border-gray-200">
+<aside class="fixed top-0 left-0 z-40 w-64 h-screen bg-gray-800 text-white">
+  <div class="overflow-y-auto py-5 px-3 h-full border-r border-gray-700">
     <ul class="space-y-2">
       {#each pages as page, index}
       <li>
-        <button on:click={()=>selectPage(index)} class="{index == currentPageIndex ? 'bg-dark-gray' : ''} py-2 px-3 text-gray-900 rounded-lg">{page}</button>
+        <button on:click={()=>selectPage(index)} class="{index == currentPageIndex ? 'bg-gray-700' : 'bg-gray-800'} py-2 px-3 text-white rounded-lg w-full text-left hover:bg-gray-700 transition duration-150 ease-in-out">{page}</button>
       </li>
       {/each}
-      <li class="text-center"><button on:click={addPage} class="font-medium">+ Add page</button></li>
+      <li class="text-center mt-4"><button on:click={addPage} class="font-medium bg-gray-600 py-2 px-3 rounded-lg hover:bg-gray-500 transition duration-150 ease-in-out">+ Add Page</button></li>
     </ul>
   </div>
 </aside>
 
-<main class="p-4 ml-60 h-auto">
-  <div class="grid grid-cols-3 items-center mb-3">
+<main class="p-8 ml-64 h-auto bg-gray-100 min-h-screen">
+  <div class="grid grid-cols-3 items-center mb-6">
     <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}></h1>
-    <button class="ml-auto bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-900" on:click={saveNote}>Save</button>
-    <button class="ml-auto bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-900" on:click={delPage}>Delete</button>
+    <button class="ml-auto bg-blue-600 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-blue-700 transition duration-150 ease-in-out" on:click={saveNote}>Save</button>
+    <button class="ml-auto bg-red-600 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-red-700 transition duration-150 ease-in-out" on:click={delPage}>Delete</button>
   </div>
-  <hr/>
-  <textarea class="mt-3 block w-full bg-gray-50 border border-gray-300 rounded-lg text-gray-900 p-2.5" bind:value={note}></textarea>
+  <hr class="border-gray-300"/>
+  <textarea class="mt-4 block w-full bg-white border border-gray-300 rounded-lg text-gray-900 p-3 shadow-sm focus:ring focus:ring-blue-200 transition duration-150 ease-in-out" bind:value={note}></textarea>
 </main>
 
 <style>
-  .bg-light-gray {
-    background: #FBFBFB;
-  }
 
-  .bg-dark-gray {
-    background: #EFEFEF;
-  }
+
 </style>
 
  
