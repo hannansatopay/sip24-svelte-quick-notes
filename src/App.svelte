@@ -5,101 +5,51 @@
   let currentPageIndex = 0;
   let title = '';
   let note = '';
-  let db;
 
   onMount(() => {
-    // Open the IndexedDB database
-    const request = window.indexedDB.open('notes', 1);
-
-    request.onerror = function(event) {
-      console.error('Database error: ' + event.target.errorCode);
-    };
-
-    request.onsuccess = function(event) {
-      db = event.target.result;
-      loadPages();
-    };
-
-    request.onupgradeneeded = function(event) {
-      db = event.target.result;
-      db.createObjectStore('pages', { keyPath: 'id' });
-    };
+    const savedPages = localStorage.getItem("pages");
+    if (savedPages) {
+      pages = JSON.parse(savedPages);
+      title = pages[currentPageIndex];
+      note = localStorage.getItem(title);
+    } else {
+      addPage();
+    }
   });
 
-  function loadPages() {
-    const transaction = db.transaction(['pages'], 'readonly');
-    const objectStore = transaction.objectStore('pages');
-    const request = objectStore.getAll();
-
-    request.onsuccess = function(event) {
-      pages = event.target.result.map(page => page.title);
-      selectPage(currentPageIndex);
-    };
-  }
-
   function saveNote() {
-    const transaction = db.transaction(['pages'], 'readwrite');
-    const objectStore = transaction.objectStore('pages');
+    const storedPageName = pages[currentPageIndex];
+    if (storedPageName !== title) {
+      localStorage.removeItem(storedPageName);
+      pages[currentPageIndex] = title;
+    }
 
-    const page = { id: title, title, note };
-    const request = objectStore.put(page);
-
-    request.onsuccess = function(event) {
-      console.log('Note saved successfully');
-    };
-
-    transaction.oncomplete = function(event) {
-      console.log('Transaction completed');
-    };
+    localStorage.setItem(title, note);
+    localStorage.setItem("pages", JSON.stringify(pages));
   }
 
   function addPage() {
     const newPageIndex = pages.length;
-    const newTitle = `New Page ${newPageIndex + 1}`;
-    const transaction = db.transaction(['pages'], 'readwrite');
-    const objectStore = transaction.objectStore('pages');
-
-    const page = { id: newTitle, title: newTitle, note: '' };
-    const request = objectStore.add(page);
-
-    request.onsuccess = function(event) {
-      pages.push(newTitle);
-      selectPage(newPageIndex);
-    };
+    pages.push("New Page");
+    selectPage(newPageIndex);
   }
 
   function selectPage(index) {
     currentPageIndex = index;
     title = pages[currentPageIndex];
-
-    const transaction = db.transaction(['pages'], 'readonly');
-    const objectStore = transaction.objectStore('pages');
-    const request = objectStore.get(title);
-
-    request.onsuccess = function(event) {
-      const page = event.target.result;
-      if (page) {
-        note = page.note;
-      } else {
-        note = '';
-      }
-    };
+    note = localStorage.getItem(title);
   }
 
   function deletePage(index) {
     const pageToDelete = pages[index];
     if (confirm(`Are you sure you want to delete "${pageToDelete}"?`)) {
-      const transaction = db.transaction(['pages'], 'readwrite');
-      const objectStore = transaction.objectStore('pages');
-      const request = objectStore.delete(pageToDelete);
-
-      request.onsuccess = function(event) {
-        pages.splice(index, 1);
-        if (currentPageIndex >= pages.length) {
-          currentPageIndex = pages.length - 1;
-        }
-        loadPages();
-      };
+      localStorage.removeItem(pageToDelete);
+      pages.splice(index, 1);
+      if (currentPageIndex >= pages.length) {
+        currentPageIndex = pages.length - 1;
+      }
+      localStorage.setItem("pages", JSON.stringify(pages));
+      selectPage(currentPageIndex);
     }
   }
 </script>
