@@ -1,3 +1,4 @@
+#Implemented Quick Notes app by following the tutorial and implemented extra tasks of IndexDB and deletion too.
 <script>
   import { onMount } from 'svelte';
   import { openDB } from 'idb';
