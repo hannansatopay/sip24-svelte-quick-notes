@@ -5,3 +5,7 @@
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
+* {
+  background-color: #121212;
+  color: #fff;
+}
