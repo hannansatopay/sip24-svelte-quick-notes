@@ -43,7 +43,7 @@
 
   function deletePage(index) {
   const storedPageName = pages[index];
-  localStorage.clear(index)
+  localStorage.removeItem(storedPageName);  
   pages.splice(index, 1);  
   
 
