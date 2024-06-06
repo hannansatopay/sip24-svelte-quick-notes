@@ -33,6 +33,13 @@ addpage();
   function addpage(){
  pages.push("New page");
  selectpage(pages.length?pages.length-1:0)
+  }
+  function removepage(){
+    const storedpageName=pages[currentpageindex];
+    if(storedpageName==title){
+      localStorage.removeItem(storedpageName);
+  pages.pop();
+    }
 
   }
   function selectpage(index){
@@ -51,8 +58,10 @@ note=localStorage.getItem(title);
         <button  on:click={()=>selectpage(index)} class="{index==currentpageindex?'bg-dark-gray':''} py-2 px-3 text-gray-900 rounded-lg">{page}</button>
       </li>
       {/each}
-      <li class="text-center">
-       <button class="font-medium" on:click={addpage}>+ Add Page</button>
+      <li class=" text-center">
+       <button class="font-medium" on:click={addpage}>+ Add Page</button><br>
+       <button class="font-medium" on:click={removepage}>- Delete Page</button>
+      
       </li>
     </ul>
   </div>
