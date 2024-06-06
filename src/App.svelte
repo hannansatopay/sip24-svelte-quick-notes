@@ -1,30 +1,47 @@
 <script>
   import {onMount} from 'svelte'
-  
+  import Dexie from 'dexie'
+
   let pages = []
   let currentPageIndex = 0
   let title = ''
   let note = ''
 
-  onMount(()=>{
-    const savedPages = localStorage.getItem("pages")
-    if (savedPages) {
-      pages = JSON.parse(savedPages)
+  const db = new Dexie('notesDB');
+  db.version(1).stores({
+    pages: 'title',
+    notes: 'title, note'
+  });
+
+  onMount(async ()=>{
+    // const savedPages = localStorage.getItem("pages")
+    const savedPages = await db.pages.toArray()
+    if (savedPages.length > 0) {
+      pages = savedPages.map(page => page.title)
       title = pages[currentPageIndex]
-      note = localStorage.getItem(title)
+      // note = localStorage.getItem(title)
+      const noteData = await db.notes.get(title)
+      note = noteData.note
+      console.log('pages loaded');
     }else {
       addPage()
+      // pages =  pages//re-render the added page to show up on the left
+      console.log('adding page');
     }
   })
 
-  function saveNote(){
+  async function saveNote(){
     const storedPageName = pages[currentPageIndex]
     if(storedPageName != title){
-      localStorage.removeItem(storedPageName)
+      // localStorage.removeItem(storedPageName)
+      await db.pages.delete(storedPageName)
+      await db.notes.delete(storedPageName)
       pages[currentPageIndex] = title
     }
-    localStorage.setItem(title, note || '')
-    localStorage.setItem("pages", JSON.stringify(pages))
+    // localStorage.setItem(title, note || '')
+    // localStorage.setItem("pages", JSON.stringify(pages))
+    await db.notes.put({title, note: note || ''})
+    await db.pages.put({title: pages[currentPageIndex]})
   }
 
   function addPage() {
@@ -32,30 +49,37 @@
     selectPage(pages.length ? pages.length-1 : 0)
   }
 
-  function selectPage(index){
+  async function selectPage(index){
     currentPageIndex = index
     title = pages[currentPageIndex]
-    note = localStorage.getItem(title)
+    // note = localStorage.getItem(title)
+    const noteData = await db.notes.get(title) || ''
+    note = noteData.note
   }
 
-  function deletePage(index){
+  async function deletePage(index){
     const pageTitle = pages[index]
     pages.splice(index, 1)
-    localStorage.removeItem(pageTitle)
+    // localStorage.removeItem(pageTitle)
+    await db.pages.delete(pageTitle)
+    await db.notes.delete(pageTitle)
 
     if (currentPageIndex >= index) {
-      currentPageIndex--;
+      currentPageIndex--; //select previous page if exist
     }
 
     if(pages.length > 0) {
       title = pages[currentPageIndex]
-      note = localStorage.getItem(title)
+      // note = localStorage.getItem(title)
+      const noteData = await db.notes.get(title) || ''
+      note = noteData.note
     } else {
       title = ''
       note = ''
+      addPage() //ensures that a page exists when a new title and note is added without pressing the add page button 
     }
 
-    localStorage.setItem("pages", JSON.stringify(pages))
+    // localStorage.setItem("pages", JSON.stringify(pages))
     pages = pages //re-render the pages
   }
 </script>
