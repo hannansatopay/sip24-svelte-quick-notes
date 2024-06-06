@@ -44,14 +44,23 @@
     title = pages[currentPageIndex];
     note = localStorage.getItem(title);
   }
+
+  function deletePage(index) {
+    currentPageIndex = index;
+    pages.pop();
+    deletePage(pages.length ?  pages.length - 1 : 0)
+
+  }
 </script>
 
 <aside class="fixed top-0 left-0 z-40 w-60 h-screen">
-  <div class="bg-light-gray overflow-y-auto py-5 px-3 h-full border-r border-gray-200">
+  <div class="bg-light-gray overflow-y-auto py-5 px-3 h-full border-r border-gray-200 ">
     <ul class="space-y-2">
       {#each pages as page, index}
         <li>
+          <!-- <div class="grid grid-cols-2 items-center mb-3"> -->
           <button on:click={()=>selectPage(index)} class="{index == currentPageIndex ? 'bg-dark-gray' : ''} py-2 px-3 text-gray-900 rounded-lg">{page}</button>
+          <button on:click={()=>deletePage(index == currentPageIndex)} class=" font-medium py-2 px-3 text-red-600 rounded-lg">Delete</button> 
         </li>
         {/each}
       <li class="text-center"><button on:click={addPage} class="font-medium">+ Add page</button></li>
