@@ -9,78 +9,59 @@
 
   const db = new Dexie('notesDB');
   db.version(1).stores({
-    pages: 'title',
-    notes: 'title, note'
+    pages: '++id, title, note',
   });
 
   onMount(async ()=>{
-    // const savedPages = localStorage.getItem("pages")
     const savedPages = await db.pages.toArray()
+    console.log(savedPages);
     if (savedPages.length > 0) {
-      pages = savedPages.map(page => page.title)
-      title = pages[currentPageIndex]
-      // note = localStorage.getItem(title)
-      const noteData = await db.notes.get(title)
-      note = noteData.note
+      pages = savedPages
+      title = pages[currentPageIndex].title
+      note = pages[currentPageIndex].note
       console.log('pages loaded');
     }else {
       addPage()
-      // pages =  pages//re-render the added page to show up on the left
-      console.log('adding page');
+      console.log('page added');
     }
   })
 
   async function saveNote(){
-    const storedPageName = pages[currentPageIndex]
-    if(storedPageName != title){
-      // localStorage.removeItem(storedPageName)
-      await db.pages.delete(storedPageName)
-      await db.notes.delete(storedPageName)
-      pages[currentPageIndex] = title
-    }
-    // localStorage.setItem(title, note || '')
-    // localStorage.setItem("pages", JSON.stringify(pages))
-    await db.notes.put({title, note: note || ''})
-    await db.pages.put({title: pages[currentPageIndex]})
+    const storedPage = pages[currentPageIndex]
+    await db.pages.put({id: storedPage.id, title, note})
+    pages[currentPageIndex] = {id: storedPage.id, title, note}
   }
 
-  function addPage() {
-    pages.push('New Page')
-    selectPage(pages.length ? pages.length-1 : 0)
+  async function addPage() {
+    const newPage = {title: 'New Page', note: ''}
+    const id = await db.pages.add(newPage)
+    pages.push({id, ...newPage})
+    selectPage(pages.length-1)
   }
 
   async function selectPage(index){
     currentPageIndex = index
-    title = pages[currentPageIndex]
-    // note = localStorage.getItem(title)
-    const noteData = await db.notes.get(title) || ''
-    note = noteData.note
+    title = pages[currentPageIndex].title
+    note = pages[currentPageIndex].note
   }
 
   async function deletePage(index){
-    const pageTitle = pages[index]
+    const page = pages[index]
     pages.splice(index, 1)
-    // localStorage.removeItem(pageTitle)
-    await db.pages.delete(pageTitle)
-    await db.notes.delete(pageTitle)
+    await db.pages.delete(page.id)
 
     if (currentPageIndex >= index) {
-      currentPageIndex--; //select previous page if exist
+      currentPageIndex = Math.max(0, currentPageIndex - 1)
     }
-
     if(pages.length > 0) {
-      title = pages[currentPageIndex]
-      // note = localStorage.getItem(title)
-      const noteData = await db.notes.get(title) || ''
-      note = noteData.note
+      title = pages[currentPageIndex].title
+      note = pages[currentPageIndex].note
     } else {
       title = ''
       note = ''
       addPage() //ensures that a page exists when a new title and note is added without pressing the add page button 
     }
-
-    // localStorage.setItem("pages", JSON.stringify(pages))
-    pages = pages //re-render the pages
+    pages = [...pages] //re-render the pages
   }
 </script>
 
@@ -89,7 +70,7 @@
     <ul class="space-y-2">
       {#each pages as page, index}
         <li class="grid grid-cols-2 items-center mb-3">
-          <button on:click={()=>selectPage(index)} class="{index == currentPageIndex && 'bg-dark-gray'} py-2 px-3 text-gray-900 rounded-lg">{page}</button>
+          <button on:click={()=>selectPage(index)} class="{index == currentPageIndex && 'bg-dark-gray'} py-2 px-3 text-gray-900 rounded-lg">{page.title}</button>
           <button>
             <svg on:click={()=>deletePage(index)} class="ml-4 my-svg" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" {...$$props}>
               <path fill="#c03030" d="M7 21q-.825 0-1.412-.587T5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .825-.587 1.413T17 21zM17 6H7v13h10zM9 17h2V8H9zm4 0h2V8h-2zM7 6v13z" />
