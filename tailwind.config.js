@@ -3,7 +3,13 @@ const config = {
 
   plugins: [require('flowbite/plugin')],
 
-  theme: {}
+  theme: {
+    extend: {
+      colors: {
+        'light-gray': '#FBFBFB',
+      },
+    },
+  },
 };
 
 module.exports = config;
