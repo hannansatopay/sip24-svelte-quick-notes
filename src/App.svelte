@@ -1,53 +1,67 @@
 <script>
+  import { openDB } from "idb";
   import { onMount } from "svelte";
 
-  let pages = [];
-  let currentPageIndex = 0;
-  let name = "";
-  let note = "";
+  let db;
+  let titles = [];
+  let idx = 0;
+  let title = "";
+  let content = "";
 
-  function saveNotes() {
-    const storedPageName = pages[currentPageIndex];
-    if (storedPageName != name) {
-      localStorage.removeItem(storedPageName);
-      pages[currentPageIndex] = name;
-    }
-    localStorage.setItem(name, note);
-    localStorage.setItem("pages", JSON.stringify(pages));
+  async function initDB() {
+    db = await openDB("notesDB", 1, {
+      upgrade(db) {
+        db.createObjectStore("notes", { keyPath: "title" });
+        db.createObjectStore("titles", { autoIncrement: true });
+      },
+    });
   }
 
-  function deleteNote() {
-    const pageToDelete = pages[currentPageIndex];
-    localStorage.removeItem(pageToDelete);
-    pages.splice(currentPageIndex, 1);
-    if (pages.length > 0) {
-      selectPage(currentPageIndex > 0 ? currentPageIndex - 1 : 0);
-    } else {
-      addPage();
+  async function save() {
+    const currTitle = titles[idx];
+    if (currTitle != title) {
+      await db.delete("notes", currTitle);
+      titles[idx] = title;
     }
-    localStorage.setItem("pages", JSON.stringify(pages));
+    await db.put("notes", { title, content });
+    await db.put("titles", { id: idx, title });
   }
 
-  onMount(() => {
-    const savedPages = localStorage.getItem("pages");
-    if (savedPages) {
-      pages = JSON.parse(savedPages);
-      name = pages[currentPageIndex] || "New Page";
-      note = localStorage.getItem(name);
+  async function remove() {
+    const delTitle = titles[idx];
+    await db.delete("notes", delTitle);
+    titles.splice(idx, 1);
+    if (titles.length > 0) {
+      select(idx > 0 ? idx - 1 : 0);
     } else {
-      addPage();
+      add();
+    }
+    await db.put("titles", { id: 0, title: titles });
+  }
+
+  onMount(async () => {
+    await initDB();
+    const savedTitles = await db.getAll("titles");
+    if (savedTitles.length > 0) {
+      titles = savedTitles.map((t) => t.title);
+      title = titles[idx] || "New Note";
+      const noteData = await db.get("notes", title);
+      content = noteData ? noteData.content : "";
+    } else {
+      add();
     }
   });
 
-  function addPage() {
-    pages.push("New Page");
-    selectPage(pages.length - 1);
+  function add() {
+    titles.push("New Note");
+    select(titles.length - 1);
   }
 
-  function selectPage(index) {
-    currentPageIndex = index;
-    name = pages[currentPageIndex];
-    note = localStorage.getItem(name);
+  async function select(i) {
+    idx = i;
+    title = titles[idx];
+    const noteData = await db.get("notes", title);
+    content = noteData ? noteData.content : "";
   }
 </script>
 
@@ -56,22 +70,20 @@
     class="bg-light-gray overflow-auto py-5 px-3 border-r h-full border-gray-500"
   >
     <ul class="space-y-3">
-      {#each pages as page, index}
+      {#each titles as t, i}
         <li>
           <button
-            on:click={() => selectPage(index)}
-            class="{index == currentPageIndex
+            on:click={() => select(i)}
+            class="{i == idx
               ? 'bg-dark-gray'
               : ''} py-2 px-3 h-full border-r border-gray-300 rounded-lg"
           >
-            {page}
+            {t}
           </button>
         </li>
       {/each}
       <li class="text-center">
-        <button class=" p-3" on:click={addPage}
-          >+ Add Page</button
-        >
+        <button class="p-3" on:click={add}>+ Add Note</button>
       </li>
     </ul>
   </div>
@@ -82,29 +94,23 @@
     <h1
       class="text-3xl text-gray-600 font-bold"
       contenteditable
-      bind:textContent={name}
+      bind:textContent={title}
     ></h1>
     <div class="ml-auto">
       <button
         class="bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-950"
-        on:click={saveNotes}>Save</button
+        on:click={save}>Save</button
       >
       <button
-        class="bg-red-600 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 ml-2 hover:bg-red-700"
-        on:click={deleteNote}>Delete</button
+        class="bg-red-400 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 ml-2 hover:bg-red-500"
+        on:click={remove}>Delete</button
       >
     </div>
   </div>
   <hr />
-  <!-- <input
-    class="block w-full bg-gray-50 border border-gray-300 rounded-lg text-gray-950"
-    bind:value={name}
-    type="text"
-    placeholder="Create new"
-  /> -->
   <textarea
     class="block w-full bg-gray-50 border border-gray-300 rounded-lg text-gray-950 mt-3"
-    bind:value={note}
+    bind:value={content}
     placeholder="Write here"
   ></textarea>
 </main>
