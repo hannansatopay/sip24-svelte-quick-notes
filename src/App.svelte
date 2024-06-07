@@ -1,9 +1,10 @@
 <script>
- 
+   let name = 'sejal kalambhe'
 </script>
 
 <main>
-  Hello World
+   <input type="text" placeholder="Add title">
+   <textarea name="" id="">lsjdnbfnfnnsnnnnnnnnn</textarea>
 </main> 
 
 <style>
