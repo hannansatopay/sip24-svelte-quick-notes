@@ -26,7 +26,12 @@ onMount(()=>{
 })
 
 function saveNote(){
-  pages[currentPageIndex] = title;
+  const storedPageName = pages[currentPageIndex];
+  if(storedPageName != title){
+    localStorage.removeItem(storedPageName);
+    pages[currentPageIndex] = title;
+
+  }
 localStorage.setItem(title,note);
 localStorage.setItem("pages",JSON.stringify(pages));
 }
