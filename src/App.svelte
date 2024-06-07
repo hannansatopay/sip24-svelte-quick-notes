@@ -49,7 +49,7 @@ function selectPage(index){
       {#each pages as page,index}
       <li>
      
-        <button on:click={()=> selectPage(index)} class="bg-dark-gray py-2 px-3 text-gray-900 rounded-lg">
+        <button on:click={()=> selectPage(index)} class="{index == currentPageIndex ? "bg-dark-gray":""}  py-2 px-3 text-gray-900 rounded-lg">
           {page}
         </button>
         
