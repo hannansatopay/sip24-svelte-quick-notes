@@ -14,7 +14,6 @@
       note = localStorage.getItem(title);
     } else {
       addPage();
-
     }
   });
 
@@ -30,7 +29,7 @@
 
   function addPage() {
     pages.push("New Page");
-    selectPage(pages.length ? pages.length-1 : 0);
+    selectPage(pages.length - 1);
   }
 
   function selectPage(index) {
@@ -38,21 +37,32 @@
     title = pages[currentPageIndex];
     note = localStorage.getItem(title);
   }
+
+  function deletePage(index) {
+    const pageTitle = pages[index];
+    pages.splice(index, 1);
+    localStorage.removeItem(pageTitle);
+    localStorage.setItem("pages", JSON.stringify(pages));
+    if (pages.length > 0) {
+      selectPage(index < pages.length ? index : pages.length - 1);
+    } else {
+      addPage();
+    }
+  }
 </script>
 
 <aside class="fixed top-0 left-0 z-40 w-60">
-<div class="bg-light-gray overflow-y-auto py-5 px-3 h-full border-r border-gray-200">
-  <ul class="space-y-2">
-    {#each pages as page, index}
-    <li>
-      
-        <button on:click={()=>selectPage(index)} class="{index == currentPageIndex ? 'bg-dark-gray' : ''}bg-dark-gray py-2 px-3 text-gray-900 rounded-lg">{page}</button>
-      
-    </li>
-    {/each}
-    <li class="text-center"><button on:click={addPage} class="font-medium">+ Add Page</button></li>
-  </ul>
-</div>
+  <div class="bg-light-gray overflow-y-auto py-5 px-3 h-full border-r border-gray-200">
+    <ul class="space-y-2">
+      {#each pages as page, index}
+        <li class="flex justify-between items-center">
+          <button on:click={() => selectPage(index)} class="{index == currentPageIndex ? 'bg-dark-gray' : ''} py-2 px-3 text-gray-900 rounded-lg">{page}</button>
+          <button on:click={() => deletePage(index)} class="bg-red-500 text-white px-2 py-1 rounded-lg ml-2 hover:bg-red-600">Delete</button>
+        </li>
+      {/each}
+      <li class="text-center"><button on:click={addPage} class="font-medium">+ Add Page</button></li>
+    </ul>
+  </div>
 </aside>
 
 <main class="p-4 ml-60 h-auto">
@@ -61,19 +71,16 @@
     <button class="ml-auto bg-gray-800 text-white px-5 py-2.5 rounded-lg mt-3 hover:bg-gray-900" on:click={saveNote}> Save </button>
   </div>
   <hr/>
-  
   <textarea class="mt-3 block w-full bg-gray-50 border border-gray-300 rounded-lg text-gray-900 p-2.5" bind:value={note}></textarea>
-  
+  <hr/>
 </main>
 
 <style>
-.bg-light-gray {
-  background: #FBFBFB;
-}
+  .bg-light-gray {
+    background: #FBFBFB;
+  }
 
-.bg-dark-gray {
-  background: #EFEFEF;
-
-}
-
+  .bg-dark-gray {
+    background: #EFEFEF;
+  }
 </style>
