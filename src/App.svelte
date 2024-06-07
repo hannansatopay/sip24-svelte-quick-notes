@@ -1,128 +1,58 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-
-    let pages = [];
+    let pages = JSON.parse(localStorage.getItem("pages")) || [];
     let currentPageIndex = 0;
     let title = 'New Note';
     let note = '';
 
-    let db;
-
     onMount(() => {
-        openDB();
+        loadPageData();
     });
 
-    function openDB() {
-        const dbName = "NotesDB";
-        const request = window.indexedDB.open(dbName, 1);
-
-        request.onerror = function(event) {
-            console.error("Error opening database:", request.error);
-        };
-
-        request.onsuccess = function(event) {
-            db = request.result;
-            loadPageData();
-        };
-
-        request.onupgradeneeded = function(event) {
-            db = request.result;
-            if (!db.objectStoreNames.contains("notes")) {
-                const objectStore = db.createObjectStore("notes", { keyPath: "title" });
-            }
-        };
-    }
-
-    //To refresh the notes list
     function loadPageData() {
-        const transaction = db.transaction(["notes"], "readonly");
-        const objectStore = transaction.objectStore("notes");
-        const request = objectStore.getAll();
-
-        request.onsuccess = function(event) {
-            const result = request.result;
-            pages = result.map(note => note.title);
-            if (pages.length > 0) {
-                selectPage(currentPageIndex);
-            }
-        };
-
-        request.onerror = function(event) {
-            console.error("Error loading notes:", request.error);
-        };
+        if (pages.length > 0) {
+            title = pages[currentPageIndex];
+            note = localStorage.getItem(title) || 'New Note';
+        }
     }
 
-    //to save the note and refreshes
     function saveNote() {
-        const transaction = db.transaction(["notes"], "readwrite");
-        const objectStore = transaction.objectStore("notes");
-        const request = objectStore.put({ title, note });
-
-        request.onsuccess = function(event) {
-            console.log("Note saved successfully");
-            loadPageData(); // Update the pages list after saving the note
-        };
-
-        request.onerror = function(event) {
-            console.error("Error saving note:", request.error);
-        };
+        const storedPage = pages[currentPageIndex];
+        if (storedPage !== title) {
+            localStorage.removeItem(storedPage);
+            pages[currentPageIndex] = title;
+        }
+        localStorage.setItem(title, note);
+        localStorage.setItem("pages", JSON.stringify(pages));
     }
 
-    //adds new note page
     function addPage() {
         const newPageTitle = "New Note" + (pages.length + 1);
         pages.push(newPageTitle);
         selectPage(pages.length - 1);
+        localStorage.setItem("pages", JSON.stringify(pages));
     }
 
     function selectPage(index) {
         currentPageIndex = index;
         title = pages[currentPageIndex];
-
-        const transaction = db.transaction(["notes"], "readonly");
-        const objectStore = transaction.objectStore("notes");
-        const request = objectStore.get(title);
-
-        request.onsuccess = function(event) {
-            const result = request.result;
-            if (result) {
-                note = result.note;
-            } else {
-                note = '';
-            }
-        };
-
-        request.onerror = function(event) {
-            console.error("Error loading note:", request.error);
-        };
+        note = localStorage.getItem(title) || '';
     }
 
-    //deletes note and refreshes
     function deleteNote() {
-        const transaction = db.transaction(["notes"], "readwrite");
-        const objectStore = transaction.objectStore("notes");
-        const request = objectStore.delete(title);
-
-        request.onsuccess = function(event) {
-            const index = pages.indexOf(title);
-            if (index !== -1) {
-                pages.splice(index, 1);
-                if (currentPageIndex >= pages.length && currentPageIndex !== 0) {
-                    currentPageIndex--;
-                }
-                if (pages.length > 0) {
-                    selectPage(currentPageIndex);
-                } else {
-                    title = 'New Note';
-                    note = '';
-                }
-            }
-            loadPageData(); // Update the pages list after deleting the note
-        };
-
-        request.onerror = function(event) {
-            console.error("Error deleting note:", request.error);
-        };
+        const pageToDelete = pages[currentPageIndex];
+        localStorage.removeItem(pageToDelete);
+        pages.splice(currentPageIndex, 1);
+        if (currentPageIndex >= pages.length && currentPageIndex !== 0) {
+            currentPageIndex--;
+        }
+        if (pages.length > 0) {
+            loadPageData();
+        } else {
+            title = 'New Note';
+            note = '';
+        }
+        localStorage.setItem("pages", JSON.stringify(pages));
     }
 </script>
 
