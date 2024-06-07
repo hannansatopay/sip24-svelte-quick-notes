@@ -2,24 +2,44 @@
 
 import {onMount} from "svelte";
 
-let title= 'New Page';
+let title= '';
 let note ='';
 let pages = [];
 let currentPageIndex = 0;
 onMount(()=>{
-  title= localStorage.getItem("title" );
-  note = localStorage.getItem("note");
+  const savedPages = localStorage.getItem("pages");
+  if(savedPages){
+
+    pages = JSON.parse(savedPages);
+    title= pages[currentPageIndex];
+    note = localStorage.getItem(title)
+
+
+  }else{
+    addPage();
+
+  }
+
+  
 
 
 })
 
 function saveNote(){
+  pages[currentPageIndex] = title;
 localStorage.setItem(title,note);
+localStorage.setItem("pages",JSON.stringify(pages));
 }
 
 function addPage(){
   pages.push("New Page");
-  pages = pages;
+selectPage(pages.length? pages.length-1 : 0)
+}
+
+function selectPage(index){
+  currentPageIndex = index;
+  title = pages[currentPageIndex];
+  note = localStorage.getItem("title");
 }
 </script>
 
@@ -29,7 +49,7 @@ function addPage(){
       {#each pages as page,index}
       <li>
      
-        <button  class="bg-dark-gray py-2 px-3 text-gray-900 rounded-lg">
+        <button on:click={()=> selectPage(index)} class="bg-dark-gray py-2 px-3 text-gray-900 rounded-lg">
           {page}
         </button>
         
