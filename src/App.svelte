@@ -42,6 +42,22 @@
     await db.put('notes', { title, note });
   }
 
+  async function deleteNote() {
+    const storedPageName = pages[currentPageIndex];
+    await db.delete('notes', storedPageName);
+    await db.delete('pages', currentPageIndex + 1);
+    pages.splice(currentPageIndex, 1);
+    
+    if (pages.length > 0) {
+      currentPageIndex = Math.max(0, currentPageIndex - 1);
+      title = pages[currentPageIndex];
+      const noteObj = await db.get('notes', title);
+      note = noteObj ? noteObj.note : '';
+    } else {
+      addPage();
+    }
+  }
+
   async function addPage() {
     const newPageTitle = "New Page";
     pages.push(newPageTitle);
@@ -73,7 +89,10 @@
 <main class="p-4 ml-60 h-auto">
   <div class="grid grid-cols-2 items-center mb-3">
     <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}></h1>
-    <button class="ml-auto bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-900" on:click={saveNote}>Save</button>
+    <div class="ml-auto">
+      <button class="bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-900" on:click={saveNote}>Save</button>
+      <button class="bg-red-600 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-red-700 ml-2" on:click={deleteNote}>Delete</button>
+    </div>
   </div>
   <hr/>
   <textarea class="mt-3 block w-full bg-gray-50 border border-gray-300 rounded-lg text-gray-900 p-2.5" bind:value={note}></textarea>
