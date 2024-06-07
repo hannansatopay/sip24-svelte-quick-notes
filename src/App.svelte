@@ -53,7 +53,7 @@
 </script>
 
 <aside class="fixed top-0 left-0 z-40 w-60 h-screen">
-  <div class="bg-light-gray overflow-y-auto py-5 px-3 h-full border-r border-gray-200">
+  <div class="bg-light-gray overflow-y-auto py-5 px-4 h-full border-r border-gray-200">
     <ul class="space-y-2">
       {#each pages as page, index}
       <li class="flex items-center justify-between">
