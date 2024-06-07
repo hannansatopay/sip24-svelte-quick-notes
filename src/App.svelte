@@ -3,7 +3,9 @@ let title= '';
 let note ='';
 
 function saveNote(){
-console.log(title,note)
+console.log(title,note);
+localStorage.setItem("title",title);
+localStorage.setItem("note",note);
 }
 </script>
 
