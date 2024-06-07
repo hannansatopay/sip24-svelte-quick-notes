@@ -1,41 +1,75 @@
 <script>
   import { onMount } from 'svelte';
+  import { openDB } from 'idb';
 
   let pages = [];
   let currentPageIndex = 0;
   let title = '';
   let note = '';
+  let db;
 
-  onMount(() => {
-    const savedPages = localStorage.getItem("pages");
-    if (savedPages) {
-      pages = JSON.parse(savedPages);
+  onMount(async () => {
+    db = await openDB('noteApp', 1, {
+      upgrade(db) {
+        if (!db.objectStoreNames.contains('pages')) {
+          const store = db.createObjectStore('pages', { keyPath: 'id', autoIncrement: true });
+          store.createIndex('title', 'title', { unique: true });
+        }
+        if (!db.objectStoreNames.contains('notes')) {
+          db.createObjectStore('notes', { keyPath: 'title' });
+        }
+      }
+    });
+
+    const savedPages = await db.getAll('pages');
+    if (savedPages.length > 0) {
+      pages = savedPages.map(page => page.title);
       title = pages[currentPageIndex];
-      note = localStorage.getItem(title);
+      const noteObj = await db.get('notes', title);
+      note = noteObj ? noteObj.note : '';
     } else {
       addPage();
     }
   });
 
-  function saveNote() {
+  async function saveNote() {
     const storedPageName = pages[currentPageIndex];
     if (storedPageName != title) {
-      localStorage.removeItem(storedPageName);
+      await db.delete('notes', storedPageName);
+      await db.put('pages', { id: currentPageIndex + 1, title });
       pages[currentPageIndex] = title;
     }
-    localStorage.setItem(title, note);
-    localStorage.setItem("pages", JSON.stringify(pages));
+    await db.put('notes', { title, note });
   }
 
-  function addPage() {
-    pages.push("New Page");
+  async function deleteNote() {
+    const storedPageName = pages[currentPageIndex];
+    await db.delete('notes', storedPageName);
+    await db.delete('pages', currentPageIndex + 1);
+    pages.splice(currentPageIndex, 1);
+    
+    if (pages.length > 0) {
+      currentPageIndex = Math.max(0, currentPageIndex - 1);
+      title = pages[currentPageIndex];
+      const noteObj = await db.get('notes', title);
+      note = noteObj ? noteObj.note : '';
+    } else {
+      addPage();
+    }
+  }
+
+  async function addPage() {
+    const newPageTitle = "New Page";
+    pages.push(newPageTitle);
+    await db.add('pages', { title: newPageTitle });
     selectPage(pages.length ? pages.length - 1 : 0);
   }
 
-  function selectPage(index) {
+  async function selectPage(index) {
     currentPageIndex = index;
     title = pages[currentPageIndex];
-    note = localStorage.getItem(title);
+    const noteObj = await db.get('notes', title);
+    note = noteObj ? noteObj.note : '';
   }
 </script>
 
@@ -44,7 +78,7 @@
   <ul class="space-y-2">
     {#each pages as page, index}
     <li>
-        <button on:click={()=>selectPage(index)} class="{index == currentPageIndex ? 'bg-dark-gray' : ''} py-2 px-3 text-gray-900 rounded-lg">{page}</button>
+        <button on:click={() => selectPage(index)} class="{index == currentPageIndex ? 'bg-dark-gray' : ''} py-2 px-3 text-gray-900 rounded-lg">{page}</button>
     </li>
     {/each}
     <li class="text-center"><button on:click={addPage} class="font-medium">+ Add page</button></li>
@@ -55,7 +89,10 @@
 <main class="p-4 ml-60 h-auto">
   <div class="grid grid-cols-2 items-center mb-3">
     <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}></h1>
-    <button class="ml-auto bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-900" on:click={saveNote}>Save</button>
+    <div class="ml-auto">
+      <button class="bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-900" on:click={saveNote}>Save</button>
+      <button class="bg-red-600 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-red-700 ml-2" on:click={deleteNote}>Delete</button>
+    </div>
   </div>
   <hr/>
   <textarea class="mt-3 block w-full bg-gray-50 border border-gray-300 rounded-lg text-gray-900 p-2.5" bind:value={note}></textarea>
