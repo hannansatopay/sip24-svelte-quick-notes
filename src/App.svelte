@@ -15,6 +15,11 @@
   localStorage.setItem('note',note);
  }
 
+ function saveNote(){
+  localStorage.setItem(title,note);
+  localStorage.setItem("pages",JSON.stringify (pages));
+ }
+
  function addPage() {
   pages.push("New Page");
   pages= pages;
