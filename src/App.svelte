@@ -1,5 +1,20 @@
 <script>
- 
+  import { onMount } from "svelte";
+
+  onMount(()=>{
+    title = localStorage.getItem('title');
+    note = localStorage.getItem('note');
+  });
+  // let name = "Maley";
+  let title = '';
+  let note = '';
+
+  function saveNote(){
+    console.log(title,note);
+    localStorage.setItem('title',title);
+    localStorage.setItem('note',note);
+
+  }
 </script>
 
 <main class="p-4">
