@@ -5,3 +5,9 @@
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
+body{
+  background-image:url(https://png.pngtree.com/thumb_back/fw800/background/20210515/pngtree-floral-leaves-watercolor-mesh-background-image_716276.jpg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  }
+  
