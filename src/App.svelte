@@ -113,7 +113,7 @@
   });
 </script>
 
-<main class="center grid sm:grid-cols-3">
+<main class="center grid grid-cols-1 sm:grid-cols-3">
   <!-- Note input section -->
   <div class="px-4 py-10 bg-slate-900 col-span-1">
     <h1 class="text-4xl font-bold mb-4 text-white">Sticky Notes</h1>
@@ -137,7 +137,7 @@
 
   <!-- Notes display section -->
   <div class="p-4 col-span-2">
-    <div class="grid md:grid-flow-* md:grid-cols-3 xl:grid-cols-4 gap-8">
+    <div class="grid md:grid-flow-* md:grid-cols-3 xl:grid-cols-4 md:gap-8">
       {#each notes as note (note.id)}
         <div
           class={"border p-4 rounded-lg mb-4 shadow-lg transition-transform duration-300 transform hover:scale-105 " +
