@@ -117,7 +117,7 @@
     position: relative;
     overflow: hidden;
     display: inline-block;
-    max-width: calc(100% - 80px); /* Adjust this value as needed */
+    max-width: calc(100% - 80px);
   }
 
   .title-button {
