@@ -20,9 +20,9 @@
   let note = "";
 
   function saveNote() {
-    const storedPageName = pages[currentPageIndex]
-    if(storedPageName!==title){
-      localStorage.removeItem(storedPageName)
+    const storedPageName = pages[currentPageIndex];
+    if (storedPageName !== title) {
+      localStorage.removeItem(storedPageName);
     }
     pages[currentPageIndex] = title;
     localStorage.setItem(title, note);
@@ -32,6 +32,20 @@
   function addPage() {
     pages.push("New Page");
     selectPage(pages.length ? pages.length - 1 : 0);
+  }
+
+  function deletePage(index) {
+    const pageToDelete = pages[index];
+    pages.splice(index, 1);
+    localStorage.removeItem(pageToDelete);
+    localStorage.setItem("pages", JSON.stringify(pages));
+
+    if (pages.length === 0) {
+      addPage();
+    } else {
+      selectPage(index > 0 ? index - 1 : 0);
+    }
+    pages = pages
   }
 
   function selectPage(index) {
@@ -47,12 +61,15 @@
   >
     <ul class="space-y-2">
       {#each pages as page, index}
-        <li>
+        <li class="flex justify-between items-center">
           <button
             on:click={() => selectPage(index)}
-            class=" {index == currentPageIndex ? 'bg-dark-gray':''} py-2 px-3 text-gray-900 rounded-lg"
-            >{page}</button
-          >
+            class="{index == currentPageIndex ? 'bg-dark-gray' : ''} py-2 px-3 text-gray-900 rounded-lg"
+          >{page}</button>
+          <button
+            on:click={() => deletePage(index)}
+            class="ml-2 text-red-600 font-bold"
+          >&times;</button>
         </li>
       {/each}
       <li class="text-center font-bold">
@@ -71,8 +88,7 @@
     ></h1>
     <button
       class="bg-gray-800 text-white px-5 py-2 rounded-lg font-medium text-s mt-3 hover:bg-gray-900 ml-auto"
-      on:click={saveNote}>Save</button
-    >
+      on:click={saveNote}>Save</button>
   </div>
   <hr />
   <textarea
