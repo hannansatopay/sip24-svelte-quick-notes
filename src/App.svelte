@@ -1,56 +1,79 @@
 <script>
   import { onMount } from "svelte";
+  import axios from "axios";
+
   let pages = [];
   let currentpageIndex = 0;
   let title = "";
   let note = "";
 
-  onMount(() => {
-    const savedPages = localStorage.getItem("pages");
-    if (savedPages) {
-      pages = JSON.parse(savedPages);
-      title = pages[currentpageIndex];
-      note = localStorage.getItem(title);
-    } else {
-      addPage();
-    }
-  });
+  onMount(fetchPages);
 
-  function saveNote() {
-    const storedPagename = pages[currentpageIndex];
-    if (storedPagename !== title) {
-      localStorage.removeItem(storedPagename);
-      pages[currentpageIndex] = title;
+  async function fetchPages() {
+    try {
+      const response = await axios.get("http://localhost:5000/notes");
+      pages = response.data;
+      if (pages.length > 0) {
+        selectPage(0);
+      } else {
+        addPage(); // Automatically add a page if none exist
+      }
+    } catch (error) {
+      console.error("Error fetching pages:", error);
     }
-    localStorage.setItem(title, note);
-    localStorage.setItem("pages", JSON.stringify(pages));
   }
 
-  function addPage() {
-    pages.push("new page");
-    selectPage(pages.length ? pages.length - 1 : 0);
+  async function saveNote() {
+    try {
+      const storedPage = pages[currentpageIndex];
+      const updatedPage = await axios.put(
+        `http://localhost:5000/notes/${storedPage._id}`,
+        { title, note }
+      );
+      pages[currentpageIndex] = updatedPage.data;
+    } catch (error) {
+      console.error("Error saving note:", error);
+    }
   }
 
-  function selectPage(index) {
+  async function addPage() {
+    try {
+      const response = await axios.post("http://localhost:5000/notes", {
+        title: "New Page",
+        note: "",
+      });
+      const newPage = response.data;
+      pages.push(newPage);
+      selectPage(pages.length - 1);
+    } catch (error) {
+      console.error("Error adding page:", error);
+    }
+  }
+
+  async function selectPage(index) {
     currentpageIndex = index;
-    title = pages[currentpageIndex];
-    note = localStorage.getItem(title);
+    title = pages[currentpageIndex].title;
+    note = pages[currentpageIndex].note;
   }
 
-  function deletePage(index) {
-    const pageTitleToDelete = pages[index];
-    if (confirm(`Are you sure you want to delete "${pageTitleToDelete}"?`)) {
-      localStorage.removeItem(pageTitleToDelete);
-      pages.splice(index, 1);
-      if (currentpageIndex >= pages.length) {
-        currentpageIndex = pages.length - 1;
+  async function deletePage(index) {
+    try {
+      const pageToDelete = pages[index];
+      if (confirm(`Are you sure you want to delete "${pageToDelete.title}"?`)) {
+        await axios.delete(`http://localhost:5000/notes/${pageToDelete._id}`);
+        pages.splice(index, 1);
+        if (currentpageIndex >= pages.length) {
+          currentpageIndex = pages.length - 1;
+        }
+        if (pages.length > 0) {
+          selectPage(currentpageIndex);
+        } else {
+          title = "";
+          note = "";
+        }
       }
-      if (currentpageIndex < 0) {
-        currentpageIndex = 0;
-      }
-      title = pages[currentpageIndex];
-      note = localStorage.getItem(title);
-      localStorage.setItem("pages", JSON.stringify(pages));
+    } catch (error) {
+      console.error("Error deleting page:", error);
     }
   }
 </script>
@@ -68,18 +91,15 @@
               ? 'bg-dark-gray'
               : ''} py-2 px-3 text-gray-900 rounded-lg"
           >
-            {page}
+            {page.title}
           </button>
           <button
             on:click={() => deletePage(index)}
             class="ml-2 text-red-500"
-            title="Delete"
+            title="Delete">X</button
           >
-            X
-          </button>
         </li>
       {/each}
-
       <li class="text-center">
         <button on:click={addPage} class="font-medium">+ Add Page</button>
       </li>
