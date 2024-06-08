@@ -9,10 +9,10 @@
   let db;
 
   async function initializeDB() {
-    db = await openDB('notes-db', 1, {
+    db = await openDB('notesDB', 1, {
       upgrade(db) {
         db.createObjectStore('notes', { keyPath: 'title' });
-        db.createObjectStore('metadata', { keyPath: 'pages' });
+        db.createObjectStore('metadata', { keyPath: 'key' });
       },
     });
   }
@@ -21,7 +21,7 @@
     await initializeDB();
     const savedPages = await db.get('metadata', 'pages');
     if (savedPages) {
-      pages = savedPages.pages;
+      pages = savedPages.value;
       title = pages[currentPageIndex];
       note = (await db.get('notes', title))?.note || '';
     } else {
@@ -40,7 +40,7 @@
     }
     pages[currentPageIndex] = title;
     await db.put('notes', { title, note });
-    await db.put('metadata', { pages });
+    await db.put('metadata', { key: 'pages', value: pages });
   }
 
   function addPage() {
@@ -65,7 +65,7 @@
     } else {
       selectPage(currentPageIndex);
     }
-    await db.put('metadata', { pages });
+    await db.put('metadata', { key: 'pages', value: pages });
     initialize();
   }
 </script>
@@ -100,5 +100,5 @@
 </main>
 
 <style>
-  
+
 </style>
