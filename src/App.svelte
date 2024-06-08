@@ -3,12 +3,15 @@
   import db from './dexie';
 
   let pages = [];
+  let filteredPages = [];
   let currentPageIndex = 0;
   let title = '';
   let note = '';
+  let searchQuery = '';
 
   onMount(async () => {
     pages = await db.notes.toArray();
+    filteredPages = pages;
     if (pages.length > 0) {
       selectPage(0);
     } else {
@@ -24,6 +27,7 @@
     }
     await db.notes.put({ id: storedPage.id, title, content: note });
     pages = await db.notes.toArray();
+    filterPages();
   }
 
   async function addPage() {
@@ -31,25 +35,26 @@
     const id = await db.notes.add(newPage);
     newPage.id = id;
     pages.push(newPage);
+    filterPages();
     selectPage(pages.length - 1);
   }
 
   function selectPage(index) {
     currentPageIndex = index;
-    title = pages[currentPageIndex].title;
-    note = pages[currentPageIndex].content;
+    title = filteredPages[currentPageIndex].title;
+    note = filteredPages[currentPageIndex].content;
   }
 
   async function deletePage() {
-    const pageToDelete = pages[currentPageIndex];
+    const pageToDelete = filteredPages[currentPageIndex];
     await db.notes.delete(pageToDelete.id);
-    pages.splice(currentPageIndex, 1);
-    if (pages.length === 0) {
+    pages = pages.filter(page => page.id !== pageToDelete.id);
+    filterPages();
+    if (filteredPages.length === 0) {
       addPage();
     } else {
       selectPage(currentPageIndex > 0 ? currentPageIndex - 1 : 0);
     }
-    pages = await db.notes.toArray();
     alert('Note deleted');
   }
 
@@ -57,12 +62,28 @@
     note = '';
     alert('Note content cleared');
   }
+
+  function filterPages() {
+    filteredPages = pages.filter(page => page.title.toLowerCase().includes(searchQuery.toLowerCase()));
+    currentPageIndex = 0;
+  }
+
+  function clearSearch() {
+    searchQuery = '';
+    filterPages();
+  }
 </script>
 
 <aside class="fixed top-0 left-0 z-40 w-60 h-screen bg-gray-900 text-gray-300">
   <div class="overflow-y-auto py-5 px-3 h-full border-r border-gray-800">
+    <div class="relative mb-4">
+      <input type="text" placeholder="Search notes..." bind:value={searchQuery} on:input={filterPages} class="p-2 w-full rounded-lg bg-gray-800 text-gray-300 border border-gray-700">
+      {#if searchQuery}
+        <button on:click={clearSearch} class="absolute right-2 top-2 text-gray-500 hover:text-gray-300">&times;</button>
+      {/if}
+    </div>
     <ul class="space-y-2">
-      {#each pages as page, index}
+      {#each filteredPages as page, index}
         <li>
           <button on:click={() => selectPage(index)} class="{index == currentPageIndex ? 'bg-gray-800' : ''} py-2 px-3 rounded-lg">{page.title}</button>
         </li>
