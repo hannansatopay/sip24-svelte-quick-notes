@@ -19,13 +19,18 @@
   <div class="bg-light-gray overflow-y-auto py-5 px-3 h-full bordr-r border-gray-200">
     <ul>
       <li>
-        Hello
+        <button class="bg-dark-gray py-2 px-3 text-gray-900 rounded-lg">Page Title</button>
       </li>
     </ul>
   </div>
 </aside>
 
 <main class="p-4 ml-60 h-auto">
+  <div class="grid grid-cols-2 items-center">
+    <h1 class="text-3xl font-bold">Page Title</h1>
+    <button class="bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-900"
+  </div>
+  <hr/>
  <input class="block w-full bg-gray-50 border border-gray-300 rounder=1g text-gray-900 p-2.5" bind:value={title} type='text'>
  <textarea class="mt-3 block w-full bg-gray-300 rounded-lg text-gray-900 p-2.5" bind:value={note}></textarea>
  <button class="bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-900" on:clicl={saveNote}>Save</button>
