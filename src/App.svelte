@@ -4,7 +4,7 @@
   let currentPageIndex = 0;
   let title = '';
   let note = ''; 
-  onMount(()=>{
+  function initialize() {
     const savedPages = localStorage.getItem("pages");
     if (savedPages) {
       pages = JSON.parse(savedPages);
@@ -13,6 +13,10 @@
     } else {
       addPage();
     }
+  }
+  onMount(()=>{
+    initialize();
+    
   });
   function saveNote(){
     const updation = pages[currentPageIndex];
@@ -32,6 +36,20 @@
     title = pages[currentPageIndex];
     note = localStorage.getItem(title) ;
   }
+  function deleteNote() {
+    const deletedNode = pages[currentPageIndex];
+    pages.splice(currentPageIndex, 1);
+    localStorage.removeItem(deletedNode);
+    if (pages.length === 0) {
+      addPage(); 
+    } else if (currentPageIndex >= pages.length) {
+      selectPage(pages.length - 1); 
+    } else {
+      selectPage(currentPageIndex); 
+    }
+    localStorage.setItem('pages', JSON.stringify(pages)); 
+    initialize();
+  }
 </script>
 <aside class="fixed bg-black top-0 left-0 z-20 w-56 h-screen">
   <div class="bg-gray-900 border-r border-gray-500 h-full overflow-y-auto py-5 px-3 ">
@@ -50,7 +68,10 @@
 <main class="bg-slate-900 ml-56 min-h-screen p-4">
   <div class="grid grid-cols-2 my-1 text-white items-center mb-2">
     <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}>{title || "New Page"}</h1>
-    <button on:click={saveNote} class=" font-semibold ml-auto  rounded-lg hover:bg-red-700 hover:text-white px-5 py-2 bg-white text-black">Save</button>
+    <div class="ml-auto">
+    <button on:click={saveNote} class=" font-semibold  rounded-lg hover:bg-blue-400 hover:text-white px-5 py-2 bg-white text-black">Save</button>
+    <button on:click={deleteNote} class=" font-semibold rounded-lg bg-red-700 hover:text-white px-5 py-2 text-black">Delete</button>
+    </div>
   </div>
   <hr/>
   <div class="flex flex-col space-y-4 mx-auto py-6">
