@@ -5,3 +5,7 @@
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
+
+.custom-padding {
+  padding: 10px 20px;
+}
