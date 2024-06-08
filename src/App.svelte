@@ -1,11 +1,15 @@
 <script>
   import {onMount} from 'svelte'
   import Dexie from 'dexie'
+  import debounce from 'lodash/debounce'
 
   let pages = []
   let currentPageIndex = 0
   let title = ''
   let note = ''
+  let searchQuery = ''
+  let filteredPages = []
+  let searchNoteDebounced = debounce(searchNote, 300)
 
   const db = new Dexie('notesDB');
   db.version(1).stores({
@@ -14,15 +18,12 @@
 
   onMount(async ()=>{
     const savedPages = await db.pages.toArray()
-    console.log(savedPages);
     if (savedPages.length > 0) {
       pages = savedPages
       title = pages[currentPageIndex].title
       note = pages[currentPageIndex].note
-      console.log('pages loaded');
     }else {
       addPage()
-      console.log('page added');
     }
   })
 
@@ -63,7 +64,37 @@
     }
     pages = [...pages] //re-render the pages
   }
+
+  function searchNote(){
+    if (searchQuery.trim() === '') {
+      filteredPages = [];
+      return;
+    }
+
+    filteredPages = pages.filter((page) => {
+      return page.title.toLowerCase().includes(searchQuery.toLowerCase());
+    });
+  }
+
+  function selectSearchedPage(id){
+    const index = pages.findIndex(page => page.id ===id)
+    selectPage(index)
+    filteredPages = []
+    searchQuery = ''
+  }
 </script>
+
+<header>
+  <div class="text-2xl text-gray-800 font-bold">NotesApp</div>
+  <input on:input={()=>searchNoteDebounced()} type="text" class="search-bar" placeholder="Search notes..." bind:value={searchQuery} />
+  {#if filteredPages.length > 0}
+    <div class="filtered-pages">
+      {#each filteredPages as filteredPage, index}
+        <li on:click={() => selectSearchedPage(filteredPage.id)} class="filtered-page">{filteredPage.title}</li>
+      {/each}
+    </div>
+  {/if}
+</header>
 
 <aside class="fixed top-0 left-0 z-40 w-60 h-screen">
   <div class="bg-light-gray overflow-y-auto py-5 px-3 h-full border-gray-200" >
@@ -91,7 +122,7 @@
     <button class="ml-auto bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm hover:bg-gray-900" on:click={saveNote}>Save</button>
   </div>
   <hr>
-  <textarea class="mt-4 block w-full bg-gray-50 border border-gray-300 rounded-lg p-2.5" bind:value={note} name="note" placeholder="Take a note..."></textarea>
+  <textarea class="mt-4 block w-full h-60 bg-gray-50 border border-gray-300 rounded-lg p-2.5" bind:value={note} name="note" placeholder="Take a note..."></textarea>
 </main>
 
 <style>
@@ -106,5 +137,62 @@
   .my-svg:hover {
    height: 26px;
    width: 26px;
+  }
+
+  header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 70px;
+    width: 100%;
+    background-color: #f8f9fa;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    z-index: 50;
+  }
+
+  main, aside{
+    margin-top: 70px; /* Adjust this value if the header height changes */
+  }
+
+  .search-bar {
+    width: 400px;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 0.25rem;
+    position: fixed;
+    margin-left: 230px;
+  }
+
+  .filtered-pages {
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 246px;
+    top: 60px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    /* padding: 0.5rem; */
+    z-index: 60;
+    max-height: calc(100vh - 70px);
+    overflow-y: auto;
+    width: 400px;
+    border-radius: 5px;
+  }
+
+  .filtered-page {
+    padding: 5px;
+    padding-left: 10px;
+    list-style: none;
+    border-bottom: 1px solid rgb(241, 241, 241);
+    color: rgb(26, 26, 26);
+  }
+
+  .filtered-page:hover {
+    background-color: rgb(231, 231, 231);
+    cursor: pointer;
   }
 </style>
