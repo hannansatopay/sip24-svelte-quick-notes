@@ -8,19 +8,19 @@
   let note = '';
 
   onMount(() => {
-    const savePages = localStorage.getItem("pages");
-    if (savePages){
-      pages = JSON.parse(savePages);
-      title = pages[currentPageIndex];
-      note = localStorage.getItem(title);
-    }
-    else{
+    const savedPages = localStorage.getItem("pages");
+    if (savedPages) {
+      pages = JSON.parse(savedPages);
+      if (pages.length > 0) {
+        title = pages[currentPageIndex];
+        note = localStorage.getItem(title) || '';
+      } else {
+        addPage();
+      }
+    } else {
       addPage();
     }
-
-    title = localStorage.getItem('title');
-    note = localStorage.getItem('note');
-  })
+  });
 
   function saveNote(){
     const storedPageName = pages[currentPageIndex];
@@ -33,9 +33,44 @@
     localStorage.setItem("pages", JSON.stringify(pages));
   }
 
+  function deleteNote(){
+    const storedPageName = pages[currentPageIndex];
+    localStorage.removeItem(storedPageName);
+    pages.splice(currentPageIndex, 1);
+
+    if(pages.length > 0){
+      if(currentPageIndex >= pages.length){
+        currentPageIndex = pages.length - 1;
+      }
+      title = pages[currentPageIndex];
+      note = localStorage.getItem(title) || '';
+    }
+    else{
+      addPage();
+      return;
+    }
+
+    localStorage.setItem("pages", JSON.stringify(pages));
+
+    if (currentPageIndex >= pages.length) {
+      selectPage(pages.length - 1);
+    }
+
+    location.reload();
+
+  }
+
   function addPage(){
-    pages.push("New Page");
-    selectPage(pages.length ? pages.length -1 :0);
+    let newPageTitle;
+    let counter = 1;
+
+    do{
+      newPageTitle =` New Page ${counter}`;
+      counter++;
+    }while(pages.includes(newPageTitle));
+
+    pages.push(newPageTitle);
+    selectPage(pages.length - 1);
   }
 
   function selectPage(index){
@@ -61,7 +96,9 @@
 <main class="p-4 ml-60 h-auto">
   <div class="grid grid-cols-2 items-center mb-3">
     <h1 class="text-3XL font-bold" contenteditable bind:textContent={title}></h1>
-    <button class="ml-auto bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-900" on:click={saveNote}>Save</button>
+    <button class="w-32 ml-auto bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-900" on:click={saveNote}>Save</button>
+    <h1></h1>
+    <button class="w-32 ml-auto bg-red-600 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-red-700" on:click={deleteNote}>Delete</button>
   </div>
   <hr/>
   <textarea class="mt-3 block w-full bg-gray-50 border border-gray-300 rounded-lg text-gray-900 p-2.5" bind:value={note}></textarea>
