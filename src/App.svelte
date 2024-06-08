@@ -138,6 +138,6 @@
   }
 
   .bg-dark-gray {
-    background: #efefef;
+    background: #e3dede;
   }
 </style>
