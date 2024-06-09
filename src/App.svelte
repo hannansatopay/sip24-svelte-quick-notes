@@ -1,5 +1,5 @@
 <script>
- 
+ let name ='Shriya P. Ise';
 </script>
 
 <main>
@@ -7,5 +7,8 @@
 </main>
 
 <style>
+  h1{
+    color:blue
+  }
 
 </style>
