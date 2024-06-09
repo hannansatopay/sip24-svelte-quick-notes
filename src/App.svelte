@@ -3,7 +3,7 @@
 </script>
 
 <main>
-  Hello World, my name is Hannan Satopay
+  Hello World, my name is James Bond
 </main>
 
 <style>
