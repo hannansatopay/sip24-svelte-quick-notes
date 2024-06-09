@@ -33,6 +33,22 @@
     note = localStorage.getItem(title);
   }
 
+  function deleteNote(index) {
+    const noteTitle = pages[index];
+    pages.splice(index, 1);
+    pages = pages;
+    localStorage.removeItem(noteTitle);
+    localStorage.setItem("pages", JSON.stringify(pages));
+
+    if (currentPageIndex === index) {
+      currentPageIndex = 0;
+      title = pages[currentPageIndex] || 'New Note';
+      note = localStorage.getItem(title) || '';
+    } else if (currentPageIndex > index) {
+      currentPageIndex--;
+    }
+  }
+
 </script>
 
 <aside class = "fixed left-0 top-0 z-40 w-64 h-screen">
@@ -41,7 +57,8 @@
       <li class = "text-5xl font-bold mb-6">NOTES</li>
       {#each pages as page, index}
         <li>
-            <button class = "{index === currentPageIndex ? 'px-5 py-1 border border-black rounded-lg' : ''} px-5 py-1 " on:click = {()=>selectPage(index)}>{page}</button>
+          <button class = "{index === currentPageIndex ? 'px-5 py-1 border border-black rounded-lg' : ''} px-5 py-1 " on:click = {()=>selectPage(index)}>{page}</button>
+          <button class="delete-button ml-1" on:click={() => deleteNote(index)}>&times;</button>
         </li>
       {/each}
       <li class = "mt-6 text-center"><button on:click = {addPage}>+ Add Note</button></li>
@@ -58,5 +75,8 @@
 </main>
 
 <style>
-
+  .delete-button {
+    font-size: 1.5rem; /* Adjust this value to make the cross bigger or smaller */
+    color: red;
+  }
 </style>
