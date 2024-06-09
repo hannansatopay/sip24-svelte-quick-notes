@@ -5,11 +5,14 @@
   let currentpageIndex = 0;
   let title = 'New Note';
   let note = 'Today is an excellent day';
+  let searchQuery = '';
+  let filteredPages = [];
 
   onMount(() => {
     const savedPages = localStorage.getItem("pages");
     if (savedPages) {
       Page = JSON.parse(savedPages);
+      filteredPages = Page;
       title = Page[currentpageIndex];
       note = localStorage.getItem(title);
     } else {
@@ -25,28 +28,32 @@
     }
     localStorage.setItem(title, note);
     localStorage.setItem("pages", JSON.stringify(Page));
+    filterPages();
   }
 
   function addPage() {
     Page.push("New Page");
     selectPage(Page.length ? Page.length - 1 : 0);
+    filterPages();
   }
 
   function selectPage(index) {
-    currentpageIndex = index;
-    title = Page[currentpageIndex];
+    currentpageIndex = Page.indexOf(filteredPages[index]);
+    title = filteredPages[index];
     note = localStorage.getItem(title);
   }
 
   function deletePage(index) {
-    const pageToDelete = Page[index];
+    const pageToDelete = filteredPages[index];
+    const realIndex = Page.indexOf(pageToDelete);
     localStorage.removeItem(pageToDelete);
-    Page.splice(index, 1);
+    Page.splice(realIndex, 1);
+    filteredPages.splice(index, 1);
     if (index === currentpageIndex) {
-      currentpageIndex = Page.length ? 0 : -1;
+      currentpageIndex = filteredPages.length ? 0 : -1;
     }
-    if (Page.length) {
-      title = Page[currentpageIndex];
+    if (filteredPages.length) {
+      title = filteredPages[currentpageIndex];
       note = localStorage.getItem(title);
     } else {
       title = 'New Note';
@@ -54,36 +61,171 @@
     }
     localStorage.setItem("pages", JSON.stringify(Page));
   }
+
+  function deleteAllPages() {
+    Page.forEach(page => localStorage.removeItem(page));
+    Page = [];
+    filteredPages = [];
+    title = 'New Note';
+    note = 'Today is an excellent day';
+    currentpageIndex = -1;
+    localStorage.removeItem("pages");
+  }
+
+  function filterPages() {
+    filteredPages = Page.filter(page => page.toLowerCase().includes(searchQuery.toLowerCase()));
+  }
 </script>
 
-<aside class="fixed top-0 left-0 z-40 w-60 h-screen">
-  <div class="bg-light-gray overflow-y-auto py-5 px-3 h-full border-r border-gray-200">
-    <ul class="space-y-2">
-      {#each Page as page, index}
-        <li class="flex justify-between items-center">
-          <button on:click={() => selectPage(index)} class="{index == currentpageIndex ? 'bg-dark-gray' : ''} py-2 px-3 text-gray-900 rounded-lg">{page}</button>
-          <button on:click={() => deletePage(index)} class="ml-2 text-red-500">Delete</button>
-        </li>
-      {/each}
-      <li class="text-center"><button on:click={addPage} class="font-medium">+ Add Page</button></li>
-    </ul>
-  </div>
-</aside>
-
-<main class="p-4 ml-60 h-auto">
-  <div class="grid grid-cols-2 items-center mb-3">
-    <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}></h1>
-    <button class="ml-auto bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-900" on:click={saveNote}>Save</button>
-  </div>
-  <hr />
-  <textarea class="mt-3 block w-full bg-gray-50 border border-gray-300 rounded-lg text-gray-900 p-2.5" bind:value={note}></textarea>
-</main>
-
 <style>
-  .bg-light-gray {
-    background-color: #fbfbfb;
+  :global(body) {
+    margin: 0;
+    font-family: Arial, sans-serif;
   }
-  .bg-dark-gray {
-    background-color: #efefef;
+
+  .navbar {
+    background-color: #2d3748;
+    color: white;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Center align horizontally */
+    font-weight: bold; /* Make the text bold */
+    position: relative; /* Position for absolute children */
+  }
+
+  .navbar input {
+    margin-left: auto;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    border: 1px solid #cbd5e0;
+    color: black; /* Change the text color to black */
+  }
+
+  .sidebar {
+    background-color: #2b6cb0;
+    color: white;
+    width: 200px;
+    height: 100vh;
+    padding: 1rem;
+    position: fixed;
+  }
+
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .sidebar li {
+    margin-bottom: 1rem;
+  }
+
+  .sidebar button {
+    width: 100%;
+    background-color: #2c5282;
+    color: white;
+    border: none;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    margin-bottom: 0.5rem; /* Added space between buttons */
+  }
+
+  .sidebar button:hover,
+  .sidebar button.active {
+    background-color: #2b6cb0;
+  }
+
+  .main {
+    margin-left: 220px;
+    padding: 2rem;
+  }
+
+  .main h1 {
+    border: 1px solid #cbd5e0;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    width: calc(100% - 10rem);
+    margin-bottom: 1rem; /* Added space below the title */
+  }
+
+  .main .button-container {
+    display: flex;
+    gap: 1rem; /* Added space between buttons */
+    margin-bottom: 1rem; /* Added space below the buttons */
+  }
+
+  .main button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+  }
+
+  .main button.save {
+    background-color: #2b6cb0;
+    color: white;
+  }
+
+  .main button.delete {
+    background-color: #e53e3e;
+    color: white;
+  }
+
+  .main textarea {
+    width: calc(100% - 2rem);
+    height: 300px;
+    margin-top: 1rem;
+    padding: 1rem;
+    border: 1px solid #cbd5e0;
+    border-radius: 0.25rem;
+    resize: none;
+  }
+
+  .delete-all {
+    background-color: #e53e3e;
+    color: white;
+    border: none;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    margin-top: 1rem;
+  }
+
+  .delete-all:hover {
+    background-color: #c53030;
   }
 </style>
+
+<div class="navbar">
+  <h1>Quick Notes</h1>
+  <input type="text" placeholder="Search notes" bind:value={searchQuery} on:input={filterPages} />
+</div>
+
+<div class="sidebar">
+  <ul>
+    {#each filteredPages as page, index}
+      <li>
+        <button 
+          on:click={() => selectPage(index)} 
+          class="{index == currentpageIndex ? 'active' : ''}"
+        >
+          {page}
+        </button>
+      </li>
+    {/each}
+    <li><button on:click={addPage}>+ Add Note</button></li>
+  </ul>
+  {#if Page.length > 0}
+    <button on:click={deleteAllPages} class="delete-all">Delete all Notes</button>
+  {/if}
+</div>
+
+<div class="main">
+  <h1 contenteditable bind:textContent={title}></h1>
+  <div class="button-container">
+    <button class="save" on:click={saveNote}>Save</button>
+    <button class="delete" on:click={() => deletePage(currentpageIndex)}>Delete</button>
+  </div>
+  <textarea bind:value={note}></textarea>
+</div>
