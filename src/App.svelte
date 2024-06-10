@@ -34,7 +34,7 @@
 
   async function addPage() {
     pages.push({title: 'New Page', note: ''});
-    selectPage(pages.length - 1);
+    selectPage(pages.length ? pages.length-1:0);
   }
 
   async function deletePage(index){
