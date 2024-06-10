@@ -171,20 +171,20 @@
 </main>
 
 <style>
-  /* Styles for the Navbar, Sidebar, and Main Content */
+  
   nav {
-    background-color: #4a5568; /* Grayish-blue */
-    color: #ffffff; /* White */
+    background-color: #4a5568; 
+    color: #ffffff
   }
 
-  /* Sidebar styles */
+  
   aside {
-    background-color: #edf2f7; /* Light gray */
-    border-right: 1px solid #e2e8f0; /* Light gray border on the right */
+    background-color: #edf2f7; 
+    border-right: 1px solid #e2e8f0; 
   }
 
-  /* Main content styles */
+  
   main {
-    padding: 1rem; /* Add padding around the main content */
+    padding: 1rem; 
   }
 </style>
