@@ -126,7 +126,7 @@
     </div>
   </div>
 </main>
-
+//responsive to the screen size
 <style>
   @media (max-width: 640px) {
     aside {
