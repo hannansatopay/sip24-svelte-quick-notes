@@ -1,54 +1,48 @@
 <script>
   import { onMount } from 'svelte';
+  import Dexie from 'dexie';
 
+  let db;
   let pages = [];
   let currentPageIndex = 0;
   let title = '';
   let note = '';
 
-  onMount(() => {
-    const savedPages = localStorage.getItem("pages");
-    if (savedPages) {
-      pages = JSON.parse(savedPages);
-      title = pages[currentPageIndex];
-      note = localStorage.getItem(title);
-    } else {
-      addPage();
-    }
+  onMount(async () => {
+    db = new Dexie('noteDB');
+    db.version(1).stores({
+      pages: '++id, title, note',
+    });
+
+    await loadPages();
   });
 
-  function saveNote() {
-    const storedPageName = pages[currentPageIndex];
-    if (storedPageName != title) {
-      localStorage.removeItem(storedPageName);
-      pages[currentPageIndex] = title;
-    }
-    localStorage.setItem(title, note);
-    localStorage.setItem("pages", JSON.stringify(pages));
+  async function loadPages() {
+    pages = await db.pages.toArray();
+    selectPage(currentPageIndex);
   }
 
-  function addPage() {
-    pages.push("New Page");
-    selectPage(pages.length ? pages.length - 1 : 0);
+  async function saveNote() {
+    await db.pages.update(currentPageIndex + 1, { title: title, note: note });
   }
 
-  function selectPage(index) {
+  async function addPage() {
+    await db.pages.add({ title: 'New Page', note: '' });
+    const newIndex = pages.length; // Index of the newly added page
+    await loadPages();
+    selectPage(newIndex); // Select the newly added page
+  }
+
+  async function selectPage(index) {
     currentPageIndex = index;
-    title = pages[currentPageIndex];
-    note = localStorage.getItem(title);
+    const page = await db.pages.get(currentPageIndex + 1);
+    title = page.title;
+    note = page.note;
   }
 
-  function deletePage() {
-    const pageToDelete = pages[currentPageIndex];
-    pages.splice(currentPageIndex, 1);
-    localStorage.removeItem(pageToDelete);
-    localStorage.setItem("pages", JSON.stringify(pages));
-
-    if (pages.length === 0) {
-      addPage();
-    } else {
-      selectPage(currentPageIndex > 0 ? currentPageIndex - 1 : 0);
-    }
+  async function deletePage() {
+    await db.pages.delete(currentPageIndex + 1);
+    await loadPages();
   }
 </script>
 
@@ -57,7 +51,7 @@
     <ul class="space-y-2">
       {#each pages as page, index}
         <li>
-          <button on:click={() => selectPage(index)} class="{index == currentPageIndex ? 'bg-dark-gray' : ''} py-2 px-3 text-gray-900 rounded-lg">{page}</button>
+          <button on:click={() => selectPage(index)} class="{index == currentPageIndex ? 'bg-dark-gray' : ''} py-2 px-3 text-gray-900 rounded-lg">{page.title}</button>
         </li>
       {/each}
       <li class="text-center">
