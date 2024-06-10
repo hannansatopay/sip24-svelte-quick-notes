@@ -42,9 +42,29 @@ note = localStorage.getItem('note');
  function addPage(){
   pages.push(title);
   selectPage(pages.length ? pages.length-1 : 0);
-  pages=pages;
+  
  }
 
+ function delPage(){
+  const storedPageName = pages[currentPageIndex];
+  localStorage.removeItem(storedPageName);
+  pages.splice(currentPageIndex, 1);
+  localStorage.setItem('pages', JSON.stringify(pages));
+
+  if (currentPageIndex >= pages.length) {
+        currentPageIndex = pages.length - 1;
+    }
+
+ 
+    if (pages.length > 0) {
+        selectPage(currentPageIndex);
+    } else {
+  
+        title = "";
+        note = "";
+        console.log("No pages left");
+    }
+ }
 
  function selectPage(index){
   currentPageIndex=index;
@@ -70,6 +90,9 @@ note = localStorage.getItem('note');
       <li class="m-2 text-center">
         <button class="bg-dark-gray py-2 px-3 text-gray-900 rounded-lg font-medium " on:click={addPage}> +Add Page</button>
      </li>
+     <li class="m-2 text-center">
+      <button class="bg-dark-gray py-2 px-3 text-gray-900 rounded-lg font-medium " on:click={delPage}> -Del Page</button>
+   </li>
     </ul>
    </div>
 </aside>
