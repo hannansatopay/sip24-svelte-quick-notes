@@ -1,54 +1,77 @@
 <script>
   import { onMount } from 'svelte';
+  import { openDB } from 'idb';
 
+  let db;
   let pages = [];
   let currentPageIndex = 0;
   let title = '';
   let note = '';
 
-  onMount(() => {
-    const savedpages = localStorage.getItem("pages");
-    if (savedpages) {
-      pages = JSON.parse(savedpages);
-      title = pages[currentPageIndex];
-      note = localStorage.getItem(title);
-    } else {
-      addpage();
-    }
-  });
-
-  function saveNote() {
-    const storedPageName = pages[currentPageIndex];
-    if (storedPageName != title) {
-      localStorage.removeItem(storedPageName);
-      pages[currentPageIndex] = title;
-    }
-    localStorage.setItem(title, note);
-    localStorage.setItem("pages", JSON.stringify(pages));
+  async function initDB() {
+    db = await openDB('note-app', 1, {
+      upgrade(db) {
+        if (!db.objectStoreNames.contains('notes')) {
+          db.createObjectStore('notes', { keyPath: 'title' });
+        }
+        if (!db.objectStoreNames.contains('pages')) {
+          db.createObjectStore('pages', { autoIncrement: true });
+        }
+      }
+    });
   }
 
-  function addpage() {
-    pages.push("New Page");
-    selectPage(pages.length - 1);
-  }
-
-  function deleteNote() {
-    const storedPageName = pages[currentPageIndex];
-    localStorage.removeItem(storedPageName);
-    pages.splice(currentPageIndex, 1);
+  async function loadPages() {
+    const allPages = await db.getAll('pages');
+    pages = allPages.map(page => page.title);
     if (pages.length > 0) {
-      selectPage(Math.max(0, currentPageIndex - 1));
+      await selectPage(0);
     } else {
-      addpage();
+      await addPage();
     }
-    localStorage.setItem("pages", JSON.stringify(pages));
   }
 
-  function selectPage(index) {
+  async function saveNote() {
+    const storedPageName = pages[currentPageIndex];
+    if (storedPageName !== title) {
+      await db.delete('notes', storedPageName);
+      pages[currentPageIndex] = title;
+      await db.put('pages', { id: currentPageIndex, title });
+    }
+    await db.put('notes', { title, content: note });
+  }
+
+  async function addPage() {
+    const newPageTitle = 'New Page';
+    pages.push(newPageTitle);
+    await db.add('pages', { title: newPageTitle });
+    await selectPage(pages.length - 1);
+  }
+
+  async function deleteNote() {
+    const storedPageName = pages[currentPageIndex];
+    await db.delete('notes', storedPageName);
+    pages.splice(currentPageIndex, 1);
+    await db.delete('pages', currentPageIndex);
+
+    if (pages.length > 0) {
+      await selectPage(Math.max(0, currentPageIndex - 1));
+    } else {
+      await addPage();
+    }
+  }
+
+  async function selectPage(index) {
     currentPageIndex = index;
     title = pages[currentPageIndex];
-    note = localStorage.getItem(title);
+    const noteData = await db.get('notes', title);
+    note = noteData ? noteData.content : '';
   }
+
+  onMount(async () => {
+    await initDB();
+    await loadPages();
+  });
 </script>
 
 <aside class="fixed top-0 left-0 z-40 w-60 h-screen">
@@ -62,7 +85,7 @@
         </li>
       {/each}
       <li class="text-center">
-        <button on:click={addpage} class="font-medium"> +Add Page </button>
+        <button on:click={addPage} class="font-medium"> +Add Page </button>
       </li>
     </ul>
   </div>
