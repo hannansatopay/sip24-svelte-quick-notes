@@ -1,62 +1,77 @@
 <script>
   import { onMount } from 'svelte';
+  import { getNotes,getNotesFromTitle,saveNote,deleteNoteFromTitle } from './Database.js';
 
   let pages = [];
   let currentPageIndex = 0;
   let title = '';
   let note = '';
 
-  onMount(() => {
-    const savedPages = localStorage.getItem("pages");
-    if (savedPages) {
-      pages = JSON.parse(savedPages);
-      title = pages[currentPageIndex];
-      note = localStorage.getItem(title);
+  onMount(async () => {
+    pages = await getNotes();
+
+    if (pages.length > 0) {      
+      currentPageIndex = 0;
+      title = pages[currentPageIndex].title;
+      note = pages[currentPageIndex].note;
     } else {
       addPage();
     }
   });
 
-  function saveNote() {
-    const storedPageName = pages[currentPageIndex];
+  async function saveCurrentNote() {
+    const storedPageName = pages[currentPageIndex].title;
     if (storedPageName != title) {
-      localStorage.removeItem(storedPageName);
-      pages[currentPageIndex] = title;
+      await deleteNoteFromTitle(storedPageName);
+      pages[currentPageIndex].title = title;
     }
-    localStorage.setItem(title, note);
-    localStorage.setItem("pages", JSON.stringify(pages));
+    pages[currentPageIndex].note = note;
+    await saveNote({
+      title: title,
+      note: note
+    });
   }
 
-  function addPage() {
-    pages.push("New Page");
-    selectPage(pages.length ? pages.length - 1 : 0);
+  async function addPage() {
+    pages.push({title: 'New Page', note: ''});
+    selectPage(pages.length - 1);
   }
 
-  function deletePage(){
-    const removedPage = pages[currentPageIndex];
-    pages.splice(currentPageIndex,1)
-    localStorage.removeItem(removedPage);
-    localStorage.setItem('pages',JSON.stringify(pages));
-    if(pages.length===0){
+  async function deletePage(index){
+    if(index === 0){
+      addPage();
+    }
+    const deletedPageTitle = pages[index].title;
+    await deleteNoteFromTitle(deletedPageTitle);
+    pages.splice(index,1);
+    if(pages.length === 0){
       addPage();
     }else{
-      selectPage(pages.length ? pages.length -1 : 0)
+      if(index === currentPageIndex){
+        currentPageIndex = Math.max(index-1,0);
+      }
+      selectPage(currentPageIndex);
     }
   }
 
-  function selectPage(index) {
+  async function deleteCurrentPage(){
+    await deletePage(currentPageIndex);
+  }
+
+  async function selectPage(index) {
     currentPageIndex = index;
-    title = pages[currentPageIndex];
-    note = localStorage.getItem(title);
+    const selectedNote = pages[currentPageIndex];
+    title = selectedNote.title;
+    note = selectedNote.note;
   }
 </script>
 
 <aside class="fixed top-0 left-0 z-40 w-60 h-screen">
-<div class="bg-light-gray overflow-y-auto py-5 px-3 h-full border-r border-gray-200">
+<div class="bg-light-gray overflow-y-auto py-5 px-3 h-full border-r border-gray-200"> 
   <ul class="space-y-2">
     {#each pages as page, index}
     <li>
-        <button on:click={()=>selectPage(index)} class="{index == currentPageIndex ? 'bg-dark-gray' : ''} py-2 px-3 text-gray-900 rounded-lg">{page}</button>
+      <button on:click={()=>selectPage(index)} class="{index === currentPageIndex ? 'bg-dark-gray' : ''} py-2 px-3 text-dark-900 bg-violate-900 rounded-lg hover:bg-violate-820">{page.title}</button>
     </li>
     {/each}
     <li class="text-center"><button on:click={addPage} class="bg-red-600 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-red-700">+ Add page</button></li>
@@ -67,9 +82,9 @@
 <main class="p-4 ml-60 h-auto">
   <div class="grid grid-cols-2 items-center mb-3">
     <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}></h1>
-    <div class="ml-auto flex space-x-2">
-      <button class="ml-auto bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-blue-800" on:click={saveNote}>Save</button>
-    <button class="bg-green-600 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-green-800" on:click={deletePage}>Delete</button>
+    <div class="ml-auto flex space-x-">
+      <button class="ml-auto bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-blue-800" on:click={saveCurrentNote}>Save</button>
+      <button class="bg-green-600 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 ml-2 hover:bg-green-800" on:click={()=>deleteCurrentPage}>Delete</button>
     </div>    
   </div>
   <hr/>
