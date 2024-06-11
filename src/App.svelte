@@ -121,17 +121,13 @@
     }
 </script>
 
-<aside class="fixed top-0 left-0 z-40 w-60 h-screen" style="background-color: #FFC0CB; padding: 20px; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.1);">
-    <div class="bg-light-gray overflow-y-auto py-5 px-3 h-full border-r border-gray-200">
-        <h2 class="text-xl font-bold mb-3">Pages</h2>
+<aside class="fixed top-0 left-0 z-40 w-60 h-screen bg-pink-100 shadow-md p-4">
+    <div class="bg-white rounded-lg p-4">
+        <h2 class="text-xl font-bold mb-4">Pages</h2>
         <ul>
             {#each pages as page, index}
-                <li class="{currentPageIndex === index ? 'bg-pink-200' : ''} mb-2 flex items-center">
-                    <button
-                            class="py-2 px-3 rounded-lg w-full text-left"
-                            on:click={() => selectPage(index)}>
-                        {page}
-                    </button>
+                <li class="{currentPageIndex === index ? 'bg-pink-200' : ''} mb-2 rounded-lg">
+                    <button class="py-2 px-3 w-full text-left" on:click={() => selectPage(index)}>{page}</button>
                     {#if index !== 0}
                         <button class="text-red-600 ml-2" on:click={() => deleteNote()}>🗑️</button>
                     {/if}
@@ -142,23 +138,28 @@
     </div>
 </aside>
 
-<main class="p-6 ml-60 h-auto" style="background-color: #FCE4EC; border-radius: 15px; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.1);">
-    <div class="grid grid-cols-2 items-center mb-3">
-        <h1 class="text-3xl font-bold" contenteditable="true" bind:textContent={title} style="color: #FF69B4;"></h1>
-        <button class="rounded-lg px-4 py-2 bg-gray-300 ml-auto" on:click={savenote} style="border: 2px solid #FF69B4; color: #FF69B4;">Save</button>
+<main class="ml-60 p-6">
+    <div class="mb-6">
+        <input class="bg-white border border-gray-300 rounded-lg px-3 py-2 w-full" type="text" bind:value={title}>
+        <button class="bg-pink-500 text-white rounded-lg px-4 py-2 ml-2" on:click={savenote}>Save</button>
     </div>
-    <hr class="mb-3">
-    <textarea class="block w-full bg-gray-50 border border-gray-300 rounded-lg text-gray-900 p-3" bind:value={note} style="resize: none; min-height: 400px;"></textarea>
+    <textarea class="bg-white border border-gray-300 rounded-lg px-3 py-2 w-full" bind:value={note}></textarea>
 </main>
 
 <style>
-    .bg-light-gray {
-        background: #FBFBFB;
+    body {
+        font-family: 'Roboto', sans-serif;
     }
-    .bg-dark-gray {
-        background: #EFEFEF;
+
+    .bg-pink-100 {
+        background-color: #FCE4EC;
     }
+
     .bg-pink-200 {
-        background: #FFB6C1;
+        background-color: #FFB6C1;
+    }
+
+    .shadow-md {
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     }
 </style>
