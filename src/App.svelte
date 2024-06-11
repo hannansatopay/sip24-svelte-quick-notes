@@ -44,6 +44,23 @@
     title = pages[currentPageIndex];
     note = localStorage.getItem(title);
   }
+  
+  function deletePage(index) {
+    const pageToDelete = pages[index];
+    pages.splice(index, 1);
+    localStorage.removeItem(pageToDelete);
+    localStorage.setItem("pages", JSON.stringify(pages));
+    
+    if (pages.length === 0) {
+      addPage();
+    } else {
+      currentPageIndex = Math.max(0, index - 1);
+      selectPage(currentPageIndex);
+    }
+  }
+
+
+
 </script>
 
 <aside class="fixed top-0 left-0 z-40 w-60 h-screen ">
@@ -52,6 +69,7 @@
     {#each pages as page, index}
     <li>
       <button on:click={()=>selectPage(index)} class="{index == currentPageIndex ? 'bg-dark-gray': ''} py-5 px-3 text-gray-900 rounded-lg ">{page}</button> 
+      <button on:click={() => deletePage(index)} class="delete-button text-red-600 px-2 ml-2">Delete</button>
     </li>
     {/each}
     <li class="text-center"><button on:click={addPage} class="font-medium">+Add page</button></li>
@@ -61,7 +79,7 @@
 </aside>
 
 <main class="p-4 ml-60 h-auto">
-  <div class="grid gried-cols-2 items-center mb-3">
+  <div class="grid grid-cols-2 items-center mb-3">
     <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}></h1>
     <button class="ml-auto bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-900"on:click={saveNote}>Save</button>
   </div>
@@ -73,10 +91,34 @@
 
 <style>
 .bg-light-gray{
-  background: #fBfBfB;
+  background: rgb(247, 247, 247);
 }
 
 .bg-dark-gray{
-  background: #EFEFEF ;
+  background: #e1baba ;
 }
+
+.delete-button {
+    background-color: #ff4d4d; /* Red background */
+    color: white; /* White text */
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 0.875rem;
+  }
+
+  .delete-button:hover {
+    background-color: #e60000; /* Darker red on hover */
+  }
+
+  /* Adding background image */
+  aside {
+    background-image: url(''); /* Replace with your image path */
+    background-size: cover;
+    background-position: center;
+  }
+  
+
+
 </style>
