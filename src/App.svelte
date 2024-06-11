@@ -5,11 +5,12 @@
   let pages= [];
   let currentPageIndex=0;
   onMount(() => {
-    const savedPages=localStorage.getItem("pages")
+    const savedPages = localStorage.getItem("pages");
     if (savedPages){
       pages= JSON.parse(savedPages);
       title=pages[currentPageIndex];
       note=localStorage.getItem(title);
+      note = localStorage.getItem(title) || '';
       
     }
     else{
@@ -20,19 +21,37 @@
 
   });
   function saveNote() {
+    const storedPageName=pages[currentPageIndex];
+    if(storedPageName != title)
+    {
+      localStorage.removeItem(storedPageName);
+      pages[currentPageIndex]=title;
+    }
 
-    pages[currentPageIndex]=title;
+  
     localStorage.setItem(title, note);
     localStorage.setItem("pages", JSON.stringify(pages));
   }
   function addPage() {
     pages.push("New Page");
-    selectPage(pages.length ? pages.length - 1 : 0);
+    pages=pages;
+    //selectPage(pages.length ? pages.length - 1 : 0);
   }
   function selectPage(index){
     currentPageIndex=index;
     title=pages[currentPageIndex];
     note=localStorage.getItem(title);
+  }
+  function deletePage(){
+    const deletedTitle = pages.splice(currentPageIndex, 1)[0];
+    localStorage.removeItem(deletedTitle);
+    if (pages.length > 0) {
+      selectPage(currentPageIndex === 0 ? 0 : currentPageIndex - 1);
+    } else {
+      addPage();
+    }
+    localStorage.setItem("pages", JSON.stringify(pages));
+
   }
   
 
@@ -45,7 +64,7 @@
       {#each pages as page, index}
       <li>
         
-        <button on:click={()=>selectPage(index)} class="bg-dark-gray py-2 px-3 text-gray-900 rounded-lg">{title || "New Page"}</button>
+        <button on:click={()=>selectPage(index)} class="bg-dark-gray py-2 px-3 text-gray-900 rounded-lg">{page}</button>
         
       </li>
       {/each}
@@ -58,10 +77,13 @@
 
 <main class="p-4 ml-60 h-auto" >
   <div class="grid grid-cols-2 items-center mb-3">
-    <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}>{title || "New Page"}</h1>
-    <button class="ml-auto bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-900" on:click={saveNote}>Save</button>
-
+    <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}></h1>
+    <div class="ml-auto flex space-x-2">
+      <button class="bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-900" on:click={saveNote}>Save</button>
+      <button class="bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-900" on:click={deletePage}>Delete</button>
+    </div>
   </div>
+  
   <hr/>
 
   
