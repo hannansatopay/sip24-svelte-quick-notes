@@ -1,62 +1,63 @@
 <script>
   import { onMount } from 'svelte';
+  import db, { saveNoteToIndexedDB, getNoteFromIndexedDB, deleteNoteFromIndexedDB, getAllTitlesFromIndexedDB } from './dexie';
 
   let pages = [];
   let currentPageIndex = 0;
   let title = "";
   let note = "";
 
-  onMount(() => {
-    const savedPages = localStorage.getItem("pages");
-    if (savedPages) {
-      pages = JSON.parse(savedPages);
+  onMount(async () => {
+    const savedPages = await getAllTitlesFromIndexedDB();
+    if (savedPages.length > 0) {
+      pages = savedPages.map(page => page.title);
       title = pages[currentPageIndex] || "New Page";
-      note = localStorage.getItem(title);
+      const savedNote = await getNoteFromIndexedDB(title);
+      note = savedNote ? savedNote.note : "";
     } else {
       addPage();
     }
   });
 
-  function saveNote() {
+  async function saveNote() {
     const storedPageName = pages[currentPageIndex];
     if (storedPageName !== title) {
-      localStorage.removeItem(storedPageName);
+      await deleteNoteFromIndexedDB(storedPageName);
       pages[currentPageIndex] = title;
     }
-    localStorage.setItem(title, note);
-    localStorage.setItem("pages", JSON.stringify(pages));
+    await saveNoteToIndexedDB(title, note);
   }
 
-  function addPage() {
+  async function addPage() {
     pages.push("New Page");
     selectPage(pages.length ? pages.length - 1 : 0);
   }
 
-  function selectPage(index) {
+  async function selectPage(index) {
     currentPageIndex = index;
     title = pages[currentPageIndex];
-    note = localStorage.getItem(title);
+    const savedNote = await getNoteFromIndexedDB(title);
+    note = savedNote ? savedNote.note : "";
   }
 
-  function deletePage() {
+  async function deletePage() {
     if (pages.length === 1) {
       // If only one page, reset it instead of deleting
       title = "New Page";
       note = "";
-      localStorage.setItem(title, note);
+      await saveNoteToIndexedDB(title, note);
     } else {
       const pageToDelete = pages[currentPageIndex];
-      localStorage.removeItem(pageToDelete);
+      await deleteNoteFromIndexedDB(pageToDelete);
       pages.splice(currentPageIndex, 1);
 
       // Update the index to avoid out-of-bounds issues
       currentPageIndex = Math.min(currentPageIndex, pages.length - 1);
 
       title = pages[currentPageIndex];
-      note = localStorage.getItem(title);
+      const savedNote = await getNoteFromIndexedDB(title);
+      note = savedNote ? savedNote.note : "";
     }
-
-    localStorage.setItem("pages", JSON.stringify(pages));
   }
 </script>
 
@@ -65,11 +66,11 @@
     <ul class="space-y-2">
       {#each pages as page, index}
         <li>
-          <button on:click={() => selectPage(index)} class="{index === currentPageIndex ? 'bg-dark-gray' : ''} py-2 px-3 text-gray-900 rounded-lg">{page}</button>
+          <button on:click={() => selectPage(index)} class="{index === currentPageIndex ? 'text-2xl bg-dark-gray' : ''} py-2 px-3 text-gray-900 rounded-lg">{page}</button>
         </li>
       {/each}
       <li class="text-center">
-        <button on:click={addPage} class="font-medium">
+        <button on:click={addPage} class="font-bold">
           <img src="/icon_note.png" class="w-5 h-5 inline">
          Add Page
         </button>
@@ -78,20 +79,21 @@
   </div>
 </aside>
 
-<main class="p-4 ml-60 h-auto">
+<main class="bg-light-gray p-3 ml-60 h-auto">
   <div class="grid grid-cols-2 items-center mb-3">
-    <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}></h1>
+    <h1 class="text-2xl font-bold" contenteditable bind:textContent={title}></h1>
     <div class="ml-auto flex items-center space-x-2">
-      <button class="bg-gray-500 text-white px-5 py-2.5 rounded-lg font-bold text-sm mt-3 hover:bg-gray-900" on:click={saveNote}>
+      <button class="container text-black px-3.5 py-2 rounded-lg font-bold text-sm mt-3.5 hover:bg-gray-900" on:click={saveNote}>
+        <img src="/icon_save.png" class="w-5 h-5 inline">
         Save
       </button>
       <button class="px-2 py-2 rounded-lg text-sm mt-3 hover:bg-gray-900" on:click={deletePage}>
-        <img src="/icon_trash.png" class="w-5 h-5 inline">
+        <img src="/icon_trash.png" class="w-10 h-6 inline">
       </button>
     </div>
   </div>
   <hr/>
-  <textarea class="mt-3 block w-full bg-gray-50 border border-gray-300 rounded-lg text-gray-900 p-2.5" bind:value={note}></textarea>
+  <textarea class="container mt-3 block w-full border border-gray-300 rounded-lg text-gray-900 p-.5" bind:value={note}></textarea>
 </main>
 
 <style>
@@ -99,6 +101,10 @@
     background: #d3cbea;
   }
 
+  .bg-purple {
+    background: #9382A7;
+  }
+  
   .bg-dark-gray {
     background: #8e9baf;
   }
@@ -106,9 +112,4 @@
   .bg-royal-blue {
     background: rgb(48, 44, 41);
   }
-
-  .bg-voilet {
-    background-color: #cf9aff;
-  }
-
 </style>
