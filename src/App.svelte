@@ -86,6 +86,7 @@
 
 <aside class="fixed top-0 left-0 z-40 w-60 h-screen">
   <div class="bg-light-gray overflow-y-auto py-5 px-3 h-full border-r border-gray-200">
+    <h2 class="text-xl font-bold mb-4">Notes</h2>
     <ul class="space-y-2">
       {#each pages as page, index}
       <li class="flex justify-between items-center">
@@ -98,13 +99,13 @@
   </div>
 </aside>
 
-<main class="p-4 ml-60 h-40">
+<main class="p-4 ml-60">
   <div class="grid grid-cols-2 items-center mb-3">
-    <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}></h1>
+    <h1 class="text-3xl font-bold" contenteditable bind:textContent={title} spellcheck="false"></h1>
     <button class="ml-auto bg-gray-800 text-white px-2.5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-900" on:click={saveNote}>Save</button>
   </div>
   <hr>
-  <textarea class="mt-3 w-full block bg-gray-50 border border-gray-300 rounded-lg text-gray-900 p-2.5" bind:value={content}></textarea>
+  <textarea class="mt-3 w-full h-80 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 p-2.5" bind:value={content} spellcheck="false"></textarea>
 </main>
 
 <style>
@@ -114,5 +115,18 @@
 
   .bg-dark-gray {
     background: #EFEFEF;
+  }
+
+  aside h2 {
+    color: #4A4A4A;
+    text-align: center;
+  }
+
+  button {
+    transition: background-color 0.3s;
+  }
+
+  button:hover {
+    background-color: #E0E0E0;
   }
 </style>
