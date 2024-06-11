@@ -1,5 +1,10 @@
 <script>
- 
+  import { onMount } from "svelte";
+
+  let pages = [];
+  let currentPageIndex = 0;
+  let title = "";
+  let  note = "";
 
   onMount(() => {
     const savedPages = localStorage.getItem("pages");
@@ -7,6 +12,7 @@
       pages = JSON.parse(savedPages);
       title = pages[currentPageIndex];
       note = localStorage.getItem(title);
+    } else {
       addPage();
     }
   });
@@ -33,6 +39,20 @@
     title = pages[currentPageIndex];
     note = localStorage.getItem(title);
   }
+
+  function deletePage(index){
+    const pageToDelete = pages[index];
+    localStorage.removeItem(pageToDelete);
+    pages.splice(index, 1);
+    localStorage.setItem("pages",JSON.stringify(pages));
+    if(pages.length == 0){
+      addPage();
+    }
+    else
+    {
+      selectPage(index == pages.length ? index-1 :index);
+    }
+  }
 </script>
 <aside class="fixed top-0 left-0 z-40 w-60 h-screen">
   <div class="bg-light-gray overflow-y-auto py-5 px-3 h-full border-r border-gray-200">
@@ -40,6 +60,7 @@
       {#each pages as page, index}
       <li>
         <button on:click={()=>selectPage(index)} class="{index == currentPageIndex ? 'bg-dark-gray' : ''} py-2 px-3 text-gray-900 rounded-lg">{page}</button>
+        <button on:click={() => deletePage(index)} class="text-red-600 ml-2 py-2 px-3 bg-dark-gray  rounded-lg">Delete</button>
       </li>
       {/each}
       <li class="text-center">
