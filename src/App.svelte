@@ -84,11 +84,11 @@
     <h1 class="text-2xl font-bold" contenteditable bind:textContent={title}></h1>
     <div class="ml-auto flex items-center space-x-2">
       <button class="container text-black px-3.5 py-2 rounded-lg font-bold text-sm mt-3.5 hover:bg-gray-900" on:click={saveNote}>
-        <img src="/icon_save.png" class="w-5 h-5 inline">
+        <img src="/icon_save.png" alt="" class="w-5 h-5 inline">
         Save
       </button>
       <button class="px-2 py-2 rounded-lg text-sm mt-3 hover:bg-gray-900" on:click={deletePage}>
-        <img src="/icon_trash.png" class="w-10 h-6 inline">
+        <img src="/icon_trash.png" alt="" class="w-10 h-6 inline">
       </button>
     </div>
   </div>
