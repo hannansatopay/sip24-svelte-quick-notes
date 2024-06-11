@@ -1,24 +1,25 @@
 <script>
   import { onMount } from 'svelte';
 
-  let note = "";
   let pages = [];
   let currentPageIndex = 0;
-  let title = "";
+  let title = '';
+  let note = '';
 
   onMount(() => {
     const savedPages = localStorage.getItem("pages");
     if (savedPages) {
       pages = JSON.parse(savedPages);
-      selectPage(0);
+      title = pages[currentPageIndex];
+      note = localStorage.getItem(title) || '';
     } else {
       addPage();
     }
   });
 
-  function saveNames() {
+  function saveNote() {
     const storedPageName = pages[currentPageIndex];
-    if (storedPageName !== title) {
+    if (storedPageName != title) {
       localStorage.removeItem(storedPageName);
       pages[currentPageIndex] = title;
     }
@@ -26,141 +27,71 @@
     localStorage.setItem("pages", JSON.stringify(pages));
   }
 
-  function buttonClick() {
-    alert(`Hello ${note}, your title is ${title}`);
-    saveNames();
-  }
-
   function addPage() {
-    if (!pages.includes(`New Page ${pages.length + 1}`)) {
-      pages.push(`New Page ${pages.length + 1}`);
-      selectPage(pages.length - 1);
-    }
+    pages.push("New Page");
+    selectPage(pages.length ? pages.length - 1 : 0);
   }
 
   function selectPage(index) {
     currentPageIndex = index;
     title = pages[currentPageIndex];
-    note = localStorage.getItem(title) || "";
+    note = localStorage.getItem(title) || '';
+  }
+
+  function deletePage(index) {
+    const pageTitle = pages[index];
+    localStorage.removeItem(pageTitle);
+    pages.splice(index, 1);
+    localStorage.setItem("pages", JSON.stringify(pages));
+    if (pages.length === 0) {
+      addPage();
+    } else {
+      selectPage(index === 0 ? 0 : index - 1);
+    }
   }
 </script>
 
+<aside class="fixed top-0 left-0 z-40 w-60 h-screen">
+  <div class="bg-light-gray overflow-y-auto py-5 px-3 h-full border-r border-gray-200 shadow-md">
+    <ul class="space-y-2">
+      {#each pages as page, index}
+      <li class="flex items-center justify-between">
+        <button on:click={() => selectPage(index)} class="{index == currentPageIndex ? 'bg-dark-gray text-white' : ''} py-2 px-3 text-gray-900 rounded-lg flex-grow text-left hover:bg-gray-200 transition duration-300">{page}</button>
+        <button on:click={() => deletePage(index)} class="ml-2 text-red-600 hover:text-red-800 delete-button transition duration-300">Delete</button>
+      </li>
+      {/each}
+      <li class="text-center"><button on:click={addPage} class="font-medium text-blue-600 hover:text-blue-800 transition duration-300">+ Add Page</button></li>
+    </ul>
+  </div>
+</aside>
+
+<main class="p-4 ml-60 h-auto">
+  <div class="grid grid-cols-2 items-center mb-3">
+    <!-- svelte-ignore a11y-missing-content -->
+    <h1 class="text-3xl font-bold border-b border-gray-300 focus:outline-none focus:border-blue-500 transition duration-300" contenteditable bind:innerText={title}></h1>
+    <button class="ml-auto bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-900 transition duration-300" on:click={saveNote}>Save</button>
+  </div>
+  <hr/>
+  <textarea class="mt-3 block w-full bg-gray-50 border border-gray-300 rounded-lg text-gray-900 p-2.5 resize-none focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition duration-300" rows="20" bind:value={note}></textarea>
+</main>
+
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+  .bg-light-gray {
+    background: #f7f7f7;
   }
-
-  .container {
-    width: 80%;
-    max-width: 800px;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  .bg-dark-gray {
+    background: #4a5568;
   }
-
-  .title-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+  .delete-button {
+    font-weight: bold;
   }
-
-  .title-bar h1 {
-    margin: 0;
+  h1[contenteditable] {
+    padding: 0.5rem;
   }
-
-  .sidebar {
-    max-width: 200px;
-    margin-right: 20px;
+  aside button {
+    transition: background-color 0.3s ease;
   }
-
-  .sidebar ul {
-    list-style: none;
-    padding: 0;
-  }
-
-  .sidebar li {
-    margin-bottom: 10px;
-  }
-
-  .sidebar button {
-    width: 100%;
-    padding: 10px;
-    text-align: left;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  .sidebar button:hover {
-    background-color: #007BFF;
-    color: white;
-  }
-
-  .sidebar button.active {
-    background-color: #0056b3;
-    color: white;
-  }
-
-  .main-content {
-    flex-grow: 1;
-  }
-
-  .main-content textarea,
-  .main-content input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-
-  .main-content button {
-    padding: 10px 20px;
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  .main-content button:hover {
-    background-color: #0056b3;
+  textarea {
+    font-family: 'Roboto', sans-serif;
   }
 </style>
-
-<div class="container">
-  <div class="title-bar">
-    <h1>Note Taking App</h1>
-  </div>
-  <div style="display: flex;">
-    <aside class="sidebar">
-      <ul>
-        {#each pages as page, index}
-          <li>
-            <button on:click={() => selectPage(index)} class="{index === currentPageIndex ? 'active' : ''}">{page}</button>
-          </li>
-        {/each}
-        <li class="text-center">
-          <button on:click={addPage}>+ Add Page</button>
-        </li>
-      </ul>
-    </aside>
-    <main class="main-content">
-      <div class="grid grid-cols-2 items-center mb-3">
-        <input type="text" class="text-3xl font-bold" bind:value={title} on:input={saveNames} placeholder="Page Title">
-        <button class="ml-auto bg-green-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-900" on:click={buttonClick}>Save</button>
-      </div>
-      <textarea class="block w-full bg-gray-50 border border-gray-300 rounded-lg text-gray-900 p-2.5 mb-4" bind:value={note} placeholder="Add your note"></textarea>
-    </main>
-  </div>
-</div>
-
