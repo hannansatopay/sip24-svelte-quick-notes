@@ -89,7 +89,7 @@
     padding: 0.5rem;
   }
   aside button {
-    transition: background-color 0.3s ease;
+    transition: background-color 0.4s ease;
   }
   textarea {
     font-family: 'Roboto', sans-serif;
