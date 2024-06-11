@@ -1,9 +1,19 @@
 <script>
+  
+  import { onMount } from 'svelte'; 
+
   let title="New Note";
   let note="Today is an excellent day!";
 
+  onMount(()=>{
+  title=localStorage.getItem('title');
+  note=localStorage.getItem('note');
+}
+);
+
   function saveNote(){
-    console.log(title,note);
+    localStorage.setItem('title',title);
+    localStorage.setItem('note',note);
   }
  
 </script>
