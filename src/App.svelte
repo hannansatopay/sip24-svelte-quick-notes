@@ -1,9 +1,12 @@
 <script>
- 
+  import NoteForm from './NoteForm.svelte';
+  import NoteList from './NoteList.svelte';
 </script>
 
 <main>
-  Hello World
+  
+  <NoteForm/>
+  <NoteList/>
 </main>
 
 <style>
