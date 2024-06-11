@@ -38,6 +38,12 @@
   // pages = pages;
   selectPage(pages.length ? pages.length -1 : 0)
  }
+ function removePage(index){
+    pages.splice(index, 1);
+    if(currentPageIndex >= pages.length) currentPageIndex = pages.length - 1;
+    selectPage(currentPageIndex);
+    localStorage.setItem("pages",JSON.stringify(pages));
+  }
 
  function selectPage(index){
   currentPageIndex = index;
@@ -54,6 +60,7 @@
       {#each pages as page,index}
       <li>
           <button on:click={()=>selectPage(index)} class="{index == currentPageIndex ? 'bg-dark-gray':''}  py-2 px-3 text-gray-900 rounded-lg">{page}</button>
+          <button on:click={()=>removePage(index)} class="text-red-500 font-bold py-2 px-3 hover:text-red-700 ml-2">Remove</button>
           </li>
       {/each}
       <li class="text-center"> <button on:click={addPage} class="font-medium">+ Add page</button> </li>
@@ -69,6 +76,7 @@
 <div class="grid grid-cols-2 items-center">
   <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}></h1>
   <button class="ml-auto bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-900" on:click={saveNote}>Save</button>
+  
 </div>
 <hr/>
 <!-- <input class="block w-full bg-gray-50 border border-gray-300 rounded-lg  text-gray-900 p-2.5" bind:value={title} type="text" placeholder="Add title"> -->
