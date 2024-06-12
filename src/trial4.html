@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Task Saver</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<style>
+    /* Base background styling */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(120deg, #1a1a2e, #16213e, #0f3460);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    color: white;
+}
+
+/* Decorative floating elements */
+.circle {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    animation: float 6s ease-in-out infinite;
+}
+
+.circle:nth-child(1) {
+    width: 120px;
+    height: 120px;
+    top: 15%;
+    left: 25%;
+    animation-duration: 8s;
+    background: rgba(123, 104, 238, 0.2); /* Medium Slate Blue */
+}
+
+.circle:nth-child(2) {
+    width: 180px;
+    height: 180px;
+    top: 65%;
+    left: 75%;
+    animation-duration: 10s;
+    background: rgba(72, 61, 139, 0.2); /* Dark Slate Blue */
+}
+
+.circle:nth-child(3) {
+    width: 90px;
+    height: 90px;
+    top: 35%;
+    left: 85%;
+    animation-duration: 6s;
+    background: rgba(106, 90, 205, 0.2); /* Slate Blue */
+}
+
+.circle:nth-child(4) {
+    width: 210px;
+    height: 210px;
+    top: 55%;
+    left: 35%;
+    animation-duration: 12s;
+    background: rgba(75, 0, 130, 0.2); /* Indigo */
+}
+
+/* Animation for floating effect */
+@keyframes float {
+    0% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+/* Additional styling for professional look */
+h1 {
+    font-size: 3em;
+    font-weight: 700;
+    text-align: center;
+    margin: 0;
+}
+
+.container {
+    text-align: center;
+    z-index: 10;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 1em;
+    font-weight: 600;
+    color: white;
+    background-color: #0f3460;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #16213e;
+}
+
+</style>
+<body>
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="container">
+      
+    </div>
+</body>
+</html>
