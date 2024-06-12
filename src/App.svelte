@@ -3,8 +3,8 @@
   import { onMount } from 'svelte'; 
   let pages = [];
   let currentPageIndex=0;
-  let title="New Note";
-  let note="Today is an excellent day!";
+  let title="";
+  let note="";
 
   onMount(()=>{
   const savedPages = localStorage.getItem("pages")
@@ -19,13 +19,25 @@
 );
 
   function saveNote(){
+    const storedPageName=pages[currentPageIndex];
+    if(storedPageName !=title ){
+      localStorage.removeItem(storedPageName);
+      pages[currentPageIndex]=title;
+    }
+    pages[currentPageIndex]=title;
     localStorage.setItem(title,note);
     localStorage.setItem("pages",JSON.stringify(pages));
   }
 
   function addPage(){
     pages.push("New Note");
-    pages=pages;
+    selectPage(pages.length ? pages.length-1 : 0)
+  }
+
+  function selectPage(index) {
+    currentPageIndex=index;
+    title=pages[currentPageIndex];
+    note=localStorage.getItem(title);
   }
  
 </script>
@@ -36,10 +48,10 @@
     
       {#each pages as page,index}
       <li>  
-      <button class="bg-dark-gray py-2 px-3 text-gray-900 rounded-lg"> {page}</button>
+      <button on:click={()=> selectPage(index)} class="{index == currentPageIndex ? 'bg-dark-gray':""} py-2 px-3 text-gray-900 rounded-lg"> {page}</button>
       </li>
       {/each}
-    <li class="text-center"><button on:click={addPage} class="font-medium">+ Add Note</button>
+    <li class="text-center"><button on:click={addPage} class="font-medium">+ Add Page</button>
     </li>
   </ul>
 </div>
