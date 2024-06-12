@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import { openDB } from 'idb';
 
   let Page = [];
   let currentpageIndex = 0;
@@ -7,46 +8,66 @@
   let note = 'Today is an excellent day';
   let searchQuery = '';
   let filteredPages = [];
+  let db;
 
-  onMount(() => {
-    const savedPages = localStorage.getItem("pages");
-    if (savedPages) {
-      Page = JSON.parse(savedPages);
-      filteredPages = Page;
+  async function initDB() {
+    db = await openDB('quick-notes', 1, {
+      upgrade(db) {
+        db.createObjectStore('pages', { keyPath: 'id', autoIncrement: true });
+        db.createObjectStore('notes');
+      },
+    });
+  }
+
+  async function loadPages() {
+    const tx = db.transaction('pages', 'readonly');
+    const store = tx.objectStore('pages');
+    const allPages = await store.getAll();
+    Page = allPages.map(page => page.title);
+    filteredPages = Page;
+    if (Page.length > 0) {
       title = Page[currentpageIndex];
-      note = localStorage.getItem(title);
+      note = await db.get('notes', title);
     } else {
       addPage();
     }
+  }
+
+  onMount(async () => {
+    await initDB();
+    await loadPages();
   });
 
-  function saveNote() {
+  async function saveNote() {
     const storedPageName = Page[currentpageIndex];
     if (storedPageName !== title) {
-      localStorage.removeItem(storedPageName);
+      await db.delete('notes', storedPageName);
       Page[currentpageIndex] = title;
     }
-    localStorage.setItem(title, note);
-    localStorage.setItem("pages", JSON.stringify(Page));
+    await db.put('notes', note, title);
+    await db.put('pages', { id: currentpageIndex + 1, title });
     filterPages();
   }
 
-  function addPage() {
-    Page.push("New Page");
+  async function addPage() {
+    const newPage = "New Page";
+    Page.push(newPage);
+    await db.put('pages', { id: Page.length, title: newPage });
     selectPage(Page.length ? Page.length - 1 : 0);
     filterPages();
   }
 
-  function selectPage(index) {
+  async function selectPage(index) {
     currentpageIndex = Page.indexOf(filteredPages[index]);
     title = filteredPages[index];
-    note = localStorage.getItem(title);
+    note = await db.get('notes', title);
   }
 
-  function deletePage(index) {
+  async function deletePage(index) {
     const pageToDelete = filteredPages[index];
     const realIndex = Page.indexOf(pageToDelete);
-    localStorage.removeItem(pageToDelete);
+    await db.delete('notes', pageToDelete);
+    await db.delete('pages', realIndex + 1);
     Page.splice(realIndex, 1);
     filteredPages.splice(index, 1);
     if (index === currentpageIndex) {
@@ -54,22 +75,21 @@
     }
     if (filteredPages.length) {
       title = filteredPages[currentpageIndex];
-      note = localStorage.getItem(title);
+      note = await db.get('notes', title);
     } else {
       title = 'New Note';
       note = 'Today is an excellent day';
     }
-    localStorage.setItem("pages", JSON.stringify(Page));
   }
 
-  function deleteAllPages() {
-    Page.forEach(page => localStorage.removeItem(page));
+  async function deleteAllPages() {
+    await db.clear('notes');
+    await db.clear('pages');
     Page = [];
     filteredPages = [];
     title = 'New Note';
     note = 'Today is an excellent day';
     currentpageIndex = -1;
-    localStorage.removeItem("pages");
   }
 
   function filterPages() {
@@ -229,3 +249,4 @@
   </div>
   <textarea bind:value={note}></textarea>
 </div>
+
