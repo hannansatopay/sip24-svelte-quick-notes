@@ -4,4 +4,26 @@
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  background-color: rgb(33, 33, 33);
+}
+
+.sidebar{
+  background-color: rgb(46, 46, 46);
+  color: white;
+}
+.sidebutton{
+  background-color: rgb(33, 33, 33);
+}
+.newpagetitle {
+  color: white;
+}
+
+.adele{
+  background-color: rgb(27, 28, 27);
+  padding: 10px;
+  border-radius: 1em;
+  font-size: medium;
+}
+.adele:hover{
+  background-color: rgb(112, 58, 110);
 }
