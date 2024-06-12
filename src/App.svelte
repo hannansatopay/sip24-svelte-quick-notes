@@ -1,6 +1,7 @@
 <script>
   import { onMount } from "svelte";
   import { openDB } from 'idb';
+  
 
   let title = '';
   let note = '';
@@ -146,11 +147,29 @@
     }
   }
 
-  // Function to set a reminder
-  function setReminder() {
-    // Your reminder logic here
-    alert("Reminder functionality will be implemented here.");
+  async function setReminder() {
+    try {
+      const response = await fetch('http://localhost:5000/send-reminder', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: 'recipient-email@example.com',
+          subject: 'Reminder',
+          text: 'This is a reminder message from your Svelte app.',
+        }),
+      });
+
+      const result = await response.json();
+      message = result.message;
+      setTimeout(() => message = '', 3000);
+    } catch (error) {
+      message = 'Error sending reminder';
+      setTimeout(() => message = '', 3000);
+    }
   }
+
 </script>
 
 <aside class="sidebar">
@@ -203,12 +222,6 @@
           on:click={saveNote}
         >
           Save
-        </button>
-        <button 
-          class="px-4 py-2 ml-2 font-medium text-white transition duration-300 ease-in-out bg-indigo-600 rounded-md hover:bg-indigo-500" 
-          on:click={setReminder}
-        >
-          Reminder
         </button>
       </span>
     </div>
