@@ -8,14 +8,14 @@
     pages: '++id,title',
     notes: 'title,note'
   });
-
   let pages = [];
   let currentPageIndex = 0;
   let title = ''; 
   let note = '';
   let searchQuery = '';
   let filteredPages = [];
-
+  // import {pic} from '../public/pic/logo.png';
+  const alt = "No more"
   onMount(async () => {
     await loadPages();
     if (pages.length > 0) {
@@ -90,20 +90,20 @@
   }
 </script>
 
-<header class="p-4 bg-gray-200 border-b border-blue-300 relative">
-  <h1 class="text-3xl font-bold inline-block">HandyNotes</h1>
-  <div class="inline-block relative ml-12 w-1/2">
+<header class="relative p-4 bg-gray-200 border-b border-blue-300">
+  <h1 class="inline-block text-3xl font-bold">Hello Coder</h1>
+  <div class="relative inline-block w-1/2 ml-12">
     <input 
       type="text" 
       placeholder="Search ..." 
       bind:value={searchQuery} 
       on:input={searchPages} 
-      class="w-full py-2 px-3 border border-blue-300 rounded-lg"/>
+      class="w-full px-3 py-2 border border-blue-300 rounded-lg"/>
     {#if searchQuery !== ''}
-      <ul class="dropdown-menu absolute left-0 right-0 bg-white border border-gray-300 mt-1 z-10 max-h-60 overflow-y-auto">
+      <ul class="absolute left-0 right-0 z-10 mt-1 overflow-y-auto bg-white border border-gray-300 dropdown-menu max-h-60">
         {#each filteredPages as page}
           <li>
-            <button type="button" class="dropdown-item w-full text-left px-4 py-2 cursor-pointer hover:bg-blue-100" on:click={() => selectPageFromDropdown(page)}>
+            <button type="button" class="w-full px-4 py-2 text-left cursor-pointer dropdown-item hover:bg-blue-100" on:click={() => selectPageFromDropdown(page)}>
               {page.title}
             </button>
           </li>
@@ -113,8 +113,8 @@
   </div>
 </header>
 
-<aside class="fixed top-4 left-0 z-40 w-60 h-screen mt-16">
-  <div class="bg-light-blue overflow-y-auto py-5 px-3 h-full border-r border-blue-200">
+<aside class="fixed left-0 z-40 h-screen mt-16 top-4 w-60">
+  <div class="h-full px-3 py-5 overflow-y-auto border-r border-blue-200 bg-light-blue">
     <ul class="space-y-2">
       {#each filteredPages as page, index}
         <li>
@@ -127,8 +127,8 @@
   </div>
 </aside>
 
-<main class="p-4 ml-60 h-auto">
-  <div class="grid grid-cols-2 items-center mb-3">
+<main class="h-auto p-4 ml-60">
+  <div class="grid items-center grid-cols-2 mb-3">
     <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}></h1>
     <button class="ml-auto bg-blue-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-blue-900" on:click={saveNote}>Save</button>
   </div>
@@ -160,6 +160,6 @@
   }
 
   .dropdown-item:hover {
-    background: #f8f9fa;
+    background: #386491;
   }
 </style>
