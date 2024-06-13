@@ -98,6 +98,6 @@
     background: #f3f4f6;
   }
   .bg-dark-grey {
-    background: #4b5563;
+    background: #04306e;
   }
 </style>
