@@ -18,6 +18,7 @@
   });
 
   async function saveNote() {
+
     const storedPageName = pages[currentPageIndex];
     if (storedPageName !== title) {
       await deleteNoteFromDB(storedPageName);
@@ -67,8 +68,7 @@
             {page}
           </button>
         </li>
-      {/each}
-      
+      {/each}     
     </ul>
   </div>
 </aside>
