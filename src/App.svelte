@@ -82,7 +82,7 @@
 </aside>
 
 <main class="p-4 ml-60 h-auto">
-  <div class="text-6xl text-purple-900"><h1><strong>Notes</strong><br><br></h1></div>
+  <div class="text-6xl text-purple-900"><h1><strong>Notes</strong><br></h1></div>
   <div class="grid grid-cols-2 items-center mb-3">
     <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}></h1>
     <div class="ml-auto flex space-x-2">
