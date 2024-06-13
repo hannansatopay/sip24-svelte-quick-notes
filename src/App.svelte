@@ -1,38 +1,107 @@
 <script>
     import { onMount } from "svelte";
 
+    let db;
     let pages = [];
     let currentPageIndex = 0;
     let title = "";
     let note = "";
 
-    onMount(() => {
-        const savedPages = localStorage.getItem("pages");
-        if (savedPages) {
-            pages = JSON.parse(savedPages);
-            title = pages[currentPageIndex] || "New Page";
-            note = localStorage.getItem(title);
-        } else {
-            addPage();
-        }
-    });
+    // Open or create IndexedDB database
+    const request = indexedDB.open("notes_db", 1);
+
+    request.onerror = function (event) {
+        console.error("IndexedDB error:", event.target.error);
+    };
+
+    request.onsuccess = function (event) {
+        db = event.target.result;
+        loadPagesFromDB();
+    };
+
+    request.onupgradeneeded = function (event) {
+        db = event.target.result;
+        // Create an object store for notes
+        const notesStore = db.createObjectStore("notes", { keyPath: "title" });
+    };
+
+    function loadPagesFromDB() {
+        const transaction = db.transaction(["notes"]);
+        const noteStore = transaction.objectStore("notes");
+        const request = noteStore.getAllKeys();
+
+        request.onsuccess = function (event) {
+            pages = event.target.result;
+            if (pages.length === 0) {
+                addPage();
+            } else {
+                selectPage(currentPageIndex);
+            }
+        };
+    }
+
     function saveNote() {
+        const transaction = db.transaction(["notes"], "readwrite");
+        const noteStore = transaction.objectStore("notes");
+
         const storedPageName = pages[currentPageIndex];
-        if (storedPageName != title) {
-            localStorage.removeItem(storedPageName);
+
+        if (storedPageName !== title) {
+            noteStore.delete(storedPageName);
         }
+
+        const newNote = { title, content: note };
+        noteStore.put(newNote);
+
+        // Update pages list
         pages[currentPageIndex] = title;
-        localStorage.setItem(title, note);
         localStorage.setItem("pages", JSON.stringify(pages));
     }
+
     function addPage() {
-        pages.push("New Page");
-        selectPage(pages.length ? pages.length - 1 : 0);
+        const transaction = db.transaction(["notes"], "readwrite");
+        const noteStore = transaction.objectStore("notes");
+
+        const newPage = { title: "New Page", content: "" };
+        const request = noteStore.add(newPage);
+
+        request.onsuccess = function () {
+            pages.push(newPage.title);
+            selectPage(pages.length - 1);
+        };
     }
+
     function selectPage(index) {
         currentPageIndex = index;
         title = pages[currentPageIndex];
-        note = localStorage.getItem("title");
+
+        const transaction = db.transaction(["notes"]);
+        const noteStore = transaction.objectStore("notes");
+        const request = noteStore.get(title);
+
+        request.onsuccess = function (event) {
+            const noteData = event.target.result;
+            if (noteData) {
+                note = noteData.content;
+            } else {
+                note = "";
+            }
+        };
+    }
+
+    function deletePage(index) {
+        const pageName = pages[index];
+        const transaction = db.transaction(["notes"], "readwrite");
+        const noteStore = transaction.objectStore("notes");
+
+        noteStore.delete(pageName);
+
+        pages.splice(index, 1); // Remove the page from the array
+        localStorage.setItem("pages", JSON.stringify(pages)); // Update pages list in localStorage
+
+        if (currentPageIndex === index) {
+            currentPageIndex = 0; // If the currently selected page is deleted, reset to the first page
+        }
     }
 </script>
 
@@ -50,6 +119,12 @@
                             : ''} py-2 px-3 text-gray-900 rounded-lg"
                         >{page}</button
                     >
+                    <button
+                        on:click={() => deletePage(index)}
+                        class="ml-2 py-2 px-3 text-red-600 rounded-lg"
+                    >
+                        Delete
+                    </button>
                 </li>
             {/each}
             <li class="text-center">
