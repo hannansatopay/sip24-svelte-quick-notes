@@ -130,10 +130,10 @@
 <main class="h-auto p-4 ml-60">
   <div class="grid items-center grid-cols-2 mb-3">
     <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}></h1>
-    <button class="ml-auto bg-blue-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-blue-900" on:click={saveNote}>Save</button>
+    <button class="ml-auto bg-blue-850 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-blue-850" on:click={saveNote}>Save</button>
   </div>
   <hr/>  
-  <textarea class="mt-3 block w-full bg-gray-50 border border-blue-300 rounded-lg text-gray-900 p-2.5" bind:value={note}></textarea>
+  <textarea class="mt-3 block w-full bg-gray-50 border border-blue-300 rounded-lg text-gray-900 p-2.6" bind:value={note}></textarea>
 </main>
 
 <style>
