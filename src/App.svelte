@@ -7,59 +7,73 @@
   let title = '';
   let note = '';
 
-  let db; 
+  const dbPromise = openDB('notesDB', 1, {
+    upgrade(db) {
+      if (!db.objectStoreNames.contains('pages')) {
+        const store = db.createObjectStore('pages', { keyPath: 'id', autoIncrement: true });
+        store.createIndex('name', 'name', { unique: true });
+      }
+      if (!db.objectStoreNames.contains('notes')) {
+        db.createObjectStore('notes', { keyPath: 'title' });
+      }
+    },
+  });
 
   onMount(async () => {
-    db = await openDB('notesDB', 1, {
-      upgrade(db) {
-        db.createObjectStore('notes', { keyPath: 'title' });
-        db.createObjectStore('pages', { keyPath: 'name' });
-      },
-    });
-
-    const storedPages = await db.getAll('pages');
-    if (storedPages.length > 0) {
-      pages = storedPages.map(page => page.name);
-      title = pages[currentPageIndex];
-      note = await db.get('notes', title).then(note => note ? note.content : '');
+    const db = await dbPromise;
+    const allPages = await db.getAll('pages');
+    if (allPages.length) {
+      pages = allPages;
+      selectPage(0);
     } else {
-      addPage();
+      await addPage();
     }
   });
 
   async function saveNote() {
-    const storedPagename = pages[currentPageIndex];
-    if (storedPagename != title) {
-      await db.delete('notes', storedPagename);
-      pages[currentPageIndex] = title;
+    const db = await dbPromise;
+    const page = pages[currentPageIndex];
+    const storedPageName = page.name;
+    if (storedPageName !== title) {
+      await db.delete('notes', storedPageName);
+      pages[currentPageIndex].name = title;
     }
     await db.put('notes', { title, content: note });
-    await db.put('pages', { name: title });
+    await db.put('pages', { ...page, name: title });
+    pages = await db.getAll('pages');
   }
 
   async function addPage() {
-    const newTitle = 'NEWPAGE';
-    pages.push(newTitle);
-    await db.put('pages', { name: newTitle });
+    const db = await dbPromise;
+    const newTitle = 'New Page';
+    const id = await db.add('pages', { name: newTitle });
+    const newPage = { id, name: newTitle };
+    pages.push(newPage);
     selectPage(pages.length - 1);
-  }
-
-  async function deletePage() {
-    const pageToDelete = pages[currentPageIndex];
-    await db.delete('notes', pageToDelete);
-    await db.delete('pages', pageToDelete);
-    pages.splice(currentPageIndex, 1);
-    if (pages.length === 0) {
-      addPage();
-    } else {
-      selectPage(currentPageIndex > 0 ? currentPageIndex - 1 : 0);
-    }
   }
 
   async function selectPage(index) {
     currentPageIndex = index;
-    title = pages[currentPageIndex];
-    note = await db.get('notes', title).then(note => note ? note.content : '');
+    const page = pages[currentPageIndex];
+    title = page.name;
+    const db = await dbPromise;
+    const noteObj = await db.get('notes', title);
+    note = noteObj ? noteObj.content : '';
+  }
+
+  async function deletePage() {
+    if (confirm("Are you sure you want to delete this page?")) {
+      const db = await dbPromise;
+      const page = pages[currentPageIndex];
+      await db.delete('notes', page.name);
+      await db.delete('pages', page.id);
+      pages.splice(currentPageIndex, 1);
+      if (pages.length === 0) {
+        await addPage();
+      } else {
+        selectPage(currentPageIndex > 0 ? currentPageIndex - 1 : 0);
+      }
+    }
   }
 </script>
 
@@ -68,10 +82,12 @@
     <ul class="space-y-2">
       {#each pages as page, index}
       <li>
-        <button on:click={() => selectPage(index)} class="{index == currentPageIndex ? 'bg-dark-gray' : ''} py-2 px-3 text-gray-900 rounded-lg">{page}</button>
+        <button on:click={() => selectPage(index)} class="{index === currentPageIndex ? 'bg-dark-gray' : ''} py-2 px-3 text-gray-900 rounded-lg">{page.name}</button>
       </li>
       {/each}
-      <li class="text-center"><button class="font-medium" on:click={addPage}>+Add Page</button></li>
+      <li class="text-center">
+        <button class="font-medium" on:click={addPage}>+ Add Page</button>
+      </li>
     </ul>
   </div>
 </aside>
@@ -79,19 +95,34 @@
 <main class="p-4 ml-60 h-auto">
   <div class="grid grid-cols-3 items-center mb-3">
     <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}></h1>
-    <button class="ml-auto w-20 bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-900" on:click={saveNote}>Save</button>
-    <button class="ml-2 w-20 bg-red-600 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-red-700" on:click={deletePage}>Delete</button>
+    <div class="flex justify-end space-x-2">
+      <button on:click={saveNote} class="w-20 bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-900">Save</button>
+      <button on:click={deletePage} class="w-20 bg-red-600 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-red-700">Delete</button>
+    </div>
   </div>
   <hr/>
   <textarea bind:value={note} class="block w-full mt-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-900 p-2.5"></textarea>
 </main>
 
 <style>
+  :global(body) {
+    background-color: #a9b5e7;
+    margin: 0;
+    font-family: Arial, sans-serif;
+  }
+
   .bg-light-gray {
     background: #fbfbfb;
   }
 
   .bg-dark-gray {
     background: #efefef;
+  }
+
+  hr {
+    top: 20px;
+    bottom: 20px;
+    height: 2px;
+    background: rgb(16, 16, 16);
   }
 </style>
