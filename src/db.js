@@ -13,7 +13,6 @@ export async function saveNoteToDB(title, content) {
     // @ts-ignore
     await db.notes.update(note.id, { content });
   } else {
-    // @t
     // @ts-ignore
     await db.notes.add({ title, content });
   }
