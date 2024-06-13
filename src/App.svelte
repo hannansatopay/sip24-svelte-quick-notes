@@ -68,14 +68,14 @@
 </script>
 
 <aside class="fixed top-0 left-0 z-0 w-60 h-screen">
-  <div class="bg-light-gray overflow-y-auto py-5 px-3 h-full border-r border-gray-200">
+  <div class="bg-black overflow-y-auto py-5 px-3 h-full border-r border-white ">
     <ul class="space-y-2">
       {#each pages as page, index}
       <li>
-        <button on:click={() => selectPage(index)} class="bg-dark-gray py-2 px-3 text-gray-900 rounded-lg">{page.title}</button>
+        <button on:click={() => selectPage(index)} class="{index == currentPageIndex ? 'bg-gray-700' : ''} py-2 px-3 text-white rounded-lg">{page.title}</button>
       </li>
       {/each}
-      <li class="text-center"><button on:click={addPage} class="font-medium text-white">+ Add Page</button></li>
+      <li class="text-center"><button on:click={addPage} class="font-medium text-white bg-red-600 w-10 h-10 text-2xl rounded-full">+</button></li>
     </ul>
   </div>
 </aside>
@@ -84,7 +84,8 @@
   <div class="grid grid-cols-2 items-center mb-3">
     <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}></h1>
     <div class="flex justify-end">
-      <button on:click={saveNote} class="ml-auto bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-900">Save</button>
+      <button on:click={saveNote} class=" bg-gray-800 text-white px-5 py-2.5 rounded-3xl font-medium text-sm mt-3 hover:bg-gray-900">Save</button>
+      <button on:click={deletePage} class="ml-5 bg-gray-800 text-white px-5 py-2.5 rounded-3xl font-medium text-sm mt-3 hover:bg-gray-900">Delete</button>
     </div>
   </div>
   <hr/>
@@ -92,24 +93,5 @@
 </main>
 
 <style>
-  :global(body) {
-    background-color: #a9b5e7;
-    margin: 0;
-    font-family: Arial, sans-serif;
-  }
-
-  .bg-light-gray {
-    background: #fbfbfb;
-  }
-
-  .bg-dark-gray {
-    background: #efefef;
-  }
-
-  hr {
-    top: 20px;
-    bottom: 20px;
-    height: 2px;
-    background: rgb(16, 16, 16);
-  }
+  
 </style>
