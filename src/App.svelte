@@ -7,11 +7,14 @@
   let title = '';
   let note = '';
 
-  const dbPromise = openDB('notes-db', 1, {
+  const dbPromise = openDB('notesDB', 1, {
     upgrade(db) {
       if (!db.objectStoreNames.contains('pages')) {
         const store = db.createObjectStore('pages', { keyPath: 'id', autoIncrement: true });
-        store.createIndex('title', 'title', { unique: true });
+        store.createIndex('name', 'name', { unique: true });
+      }
+      if (!db.objectStoreNames.contains('notes')) {
+        db.createObjectStore('notes', { keyPath: 'title' });
       }
     },
   });
@@ -30,17 +33,21 @@
   async function saveNote() {
     const db = await dbPromise;
     const page = pages[currentPageIndex];
-    page.title = title;
-    await db.put('pages', page);
-    const allPages = await db.getAll('pages');
-    pages = allPages;
+    const storedPageName = page.name;
+    if (storedPageName !== title) {
+      await db.delete('notes', storedPageName);
+      pages[currentPageIndex].name = title;
+    }
+    await db.put('notes', { title, content: note });
+    await db.put('pages', { ...page, name: title });
+    pages = await db.getAll('pages');
   }
 
   async function addPage() {
     const db = await dbPromise;
-    const newPage = { title: "New Page" };
-    const id = await db.add('pages', newPage);
-    newPage.id = id;
+    const newTitle = 'New Page';
+    const id = await db.add('pages', { name: newTitle });
+    const newPage = { id, name: newTitle };
     pages.push(newPage);
     selectPage(pages.length - 1);
   }
@@ -48,47 +55,53 @@
   async function selectPage(index) {
     currentPageIndex = index;
     const page = pages[currentPageIndex];
-    title = page.title;
+    title = page.name;
     const db = await dbPromise;
-    const noteObj = await db.get('pages', page.id); // Corrected to use 'pages' object store
-    note = noteObj ? noteObj.note : "";
+    const noteObj = await db.get('notes', title);
+    note = noteObj ? noteObj.content : '';
   }
 
   async function deletePage() {
     if (confirm("Are you sure you want to delete this page?")) {
       const db = await dbPromise;
       const page = pages[currentPageIndex];
+      await db.delete('notes', page.name);
       await db.delete('pages', page.id);
       pages.splice(currentPageIndex, 1);
-      if (currentPageIndex >= pages.length) {
-        selectPage(pages.length - 1);
+      if (pages.length === 0) {
+        await addPage();
+      } else {
+        selectPage(currentPageIndex > 0 ? currentPageIndex - 1 : 0);
       }
     }
   }
 </script>
 
-<aside class="fixed top-0 left-0 z-0 w-60 h-screen">
+<aside class="fixed top-0 left-0 z-40 w-60 h-screen">
   <div class="bg-light-gray overflow-y-auto py-5 px-3 h-full border-r border-gray-200">
     <ul class="space-y-2">
       {#each pages as page, index}
       <li>
-        <button on:click={() => selectPage(index)} class="bg-dark-gray py-2 px-3 text-gray-900 rounded-lg">{page.title}</button>
+        <button on:click={() => selectPage(index)} class="{index === currentPageIndex ? 'bg-dark-gray' : ''} py-2 px-3 text-gray-900 rounded-lg">{page.name}</button>
       </li>
       {/each}
-      <li class="text-center"><button on:click={addPage} class="font-medium text-white">+ Add Page</button></li>
+      <li class="text-center">
+        <button class="font-medium" on:click={addPage}>+ Add Page</button>
+      </li>
     </ul>
   </div>
 </aside>
 
 <main class="p-4 ml-60 h-auto">
-  <div class="grid grid-cols-2 items-center mb-3">
+  <div class="grid grid-cols-3 items-center mb-3">
     <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}></h1>
-    <div class="flex justify-end">
-      <button on:click={saveNote} class="ml-auto bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-900">Save</button>
+    <div class="flex justify-end space-x-2">
+      <button on:click={saveNote} class="w-20 bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-900">Save</button>
+      <button on:click={deletePage} class="w-20 bg-red-600 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-red-700">Delete</button>
     </div>
   </div>
   <hr/>
-  <textarea class="mt-3 block w-full bg-gray-50 border border-gray-300 rounded-lg text-gray-900 p-2.5" bind:value={note}></textarea>
+  <textarea bind:value={note} class="block w-full mt-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-900 p-2.5"></textarea>
 </main>
 
 <style>
