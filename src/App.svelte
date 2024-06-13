@@ -1,6 +1,6 @@
 <script>
-  import { onMount } from 'svelte';
   import { openDB } from 'idb';
+  import { onMount } from 'svelte';
 
   let pages = [];
   let currentPageIndex = 0;
@@ -93,7 +93,7 @@
 
 <style>
   :global(body) {
-    background-color: #a9b5e7;
+    background-color: #9b9b9bde;
     margin: 0;
     font-family: Arial, sans-serif;
   }
