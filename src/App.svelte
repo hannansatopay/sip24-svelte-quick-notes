@@ -30,7 +30,7 @@
  function addPage(){
   pages.push("New Page");
   selectPage(pages.length ? pages.length - 1 : 0)
-  deletePage(page.length ? pages.length - 1 : 0)
+  
  }
 
  function selectPage(index){
@@ -93,7 +93,7 @@ hr {
             top: 20px;
             bottom: 20px;
             height: 2px;
-            background: rgb(16, 16, 16);
+            background: rgb(168, 70, 70);
         }
 </style>
 
