@@ -95,12 +95,12 @@
   <div class="relative inline-block w-1/2 ml-12">
     <input 
       type="text" 
-      placeholder="Search ..." 
+      placeholder="Enter what you want ..." 
       bind:value={searchQuery} 
       on:input={searchPages} 
       class="w-full px-3 py-2 border border-blue-300 rounded-lg"/>
     {#if searchQuery !== ''}
-      <ul class="absolute left-0 right-0 z-10 mt-1 overflow-y-auto bg-white border border-gray-300 dropdown-menu max-h-60">
+      <ul class="absolute left-0 right-0 z-10 mt-1 overflow-y-auto bg-white border border-gray-300 dropdown-menu-x max-h-60">
         {#each filteredPages as page}
           <li>
             <button type="button" class="w-full px-4 py-2 text-left cursor-pointer dropdown-item hover:bg-blue-100" on:click={() => selectPageFromDropdown(page)}>
@@ -145,7 +145,7 @@
     background: #3E7FF1;
   }
 
-  .dropdown-menu {
+  .dropdown-menu-x {
     max-height: 200px;
     overflow-y: auto;
     background: #fff;
