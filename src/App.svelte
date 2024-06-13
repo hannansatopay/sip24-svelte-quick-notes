@@ -3,7 +3,7 @@
   import Dexie from 'dexie';
 
   // Define the Dexie database
-  const db = new Dexie('noteApp');
+  const db = new Dexie('HandyNotes');
   db.version(1).stores({
     pages: '++id,title',
     notes: 'title,note'
