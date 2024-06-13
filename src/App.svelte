@@ -15,7 +15,7 @@
   let searchQuery = '';
   let filteredPages = [];
   // import {pic} from '../public/pic/logo.png';
-  const alt = "No more"
+  
   onMount(async () => {
     await loadPages();
     if (pages.length > 0) {
