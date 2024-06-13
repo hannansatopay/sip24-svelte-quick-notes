@@ -1,165 +1,164 @@
 <script>
   import { onMount } from 'svelte';
-  import Dexie from 'dexie';
+  import StickyNote from './StickyNote.svelte';
 
-  // Define the Dexie database
-  const db = new Dexie('HandyNotes');
-  db.version(1).stores({
-    pages: '++id,title',
-    notes: 'title,note'
+  let pages = JSON.parse(localStorage.getItem('pages')) || [];
+  let currentPage = { title: "Current Page", notes: [], id: 1 };
+  let newNoteText = '';
+  let nextPageId = pages.length ? Math.max(...pages.map(p => p.id)) + 1 : 2;
+
+  // Load current page from localStorage or initialize if empty
+  onMount(() => {
+    const savedPage = JSON.parse(localStorage.getItem('currentPage'));
+    if (savedPage) {
+      currentPage = savedPage;
+    }
   });
 
-  let pages = [];
-  let currentPageIndex = 0;
-  let title = ''; 
-  let note = '';
-  let searchQuery = '';
-  let filteredPages = [];
+  function addNote() {
+    if (newNoteText.trim() !== '') {
+      currentPage.notes = [...currentPage.notes, { id: Date.now(), text: newNoteText }];
+      newNoteText = '';
+      saveCurrentPage();
+    }
+  }
 
-  onMount(async () => {
-    await loadPages();
-    if (pages.length > 0) {
-      await selectPage(0);
+  function deleteNote(id) {
+    currentPage.notes = currentPage.notes.filter(note => note.id !== id);
+    saveCurrentPage();
+  }
+
+  function createNewPage() {
+    savePage(currentPage);
+    currentPage = { title: `Page ${nextPageId}`, notes: [], id: nextPageId++ };
+    saveCurrentPage();
+  }
+
+  function saveCurrentPage() {
+    localStorage.setItem('currentPage', JSON.stringify(currentPage));
+  }
+
+  function savePage(page) {
+    const existingPageIndex = pages.findIndex(p => p.id === page.id);
+    if (existingPageIndex > -1) {
+      pages[existingPageIndex] = page;
     } else {
-      await addPage();
+      pages.push(page);
     }
-    filteredPages = pages;
-  });
-
-  // Load all pages
-  async function loadPages() {
-    pages = await db.table('pages').toArray();
+    localStorage.setItem('pages', JSON.stringify(pages));
   }
 
-  // Save the note
-  async function saveNote() {
-    const currentPage = pages[currentPageIndex];
-    if (currentPage.title !== title) {
-      await db.table('notes').delete(currentPage.title);
-      currentPage.title = title;
-      await db.table('pages').put(currentPage);
-    }
-    await db.table('notes').put({ title, note });
-    await loadPages();
-    filteredPages = pages;
+  function loadPage(page) {
+    saveCurrentPage();
+    currentPage = page;
+    saveCurrentPage();
   }
 
-  // Add a new page
-  async function addPage() {
-    const newPage = { title: 'New Page' };
-    await db.table('pages').add(newPage);
-    await loadPages();
-    await selectPage(pages.length - 1);
-  }
-
-  // Select a page
-  async function selectPage(index) {
-    currentPageIndex = index;
-    const currentPage = pages[currentPageIndex];
-    title = currentPage.title;
-    const noteData = await db.table('notes').get(title);
-    note = noteData ? noteData.note : '';
-  }
-
-  // Delete a page
-  async function deletePage(index) {
-    const pageToDelete = pages[index];
-    await db.table('pages').delete(pageToDelete.id);
-    await db.table('notes').delete(pageToDelete.title);
-    await loadPages();
-    if (pages.length === 0) {
-      await addPage();
-    } else {
-      await selectPage(index > 0 ? index - 1 : 0);
-    }
-    filteredPages = pages;
-  }
-
-  // Search pages
-  function searchPages() {
-    filteredPages = pages.filter(page => page.title.toLowerCase().includes(searchQuery.toLowerCase()));
-  }
-
-  function selectPageFromDropdown(page) {
-    const index = pages.findIndex(p => p.title === page.title);
-    if (index !== -1) {
-      selectPage(index);
-      searchQuery = '';
-      filteredPages = pages;
+  function deletePage(id) {
+    pages = pages.filter(page => page.id !== id);
+    localStorage.setItem('pages', JSON.stringify(pages));
+    if (currentPage.id === id) {
+      currentPage = { title: "Current Page", notes: [], id: 1 };
+      localStorage.removeItem('currentPage');
     }
   }
+
+  $: localStorage.setItem('currentPage', JSON.stringify(currentPage));
 </script>
 
-<header class="p-4 bg-gray-200 border-b border-blue-300 relative">
-  <h1 class="text-3xl font-bold inline-block">HandyNotes</h1>
-  <div class="inline-block relative ml-12 w-1/2">
-    <input 
-      type="text" 
-      placeholder="Search ..." 
-      bind:value={searchQuery} 
-      on:input={searchPages} 
-      class="w-full py-2 px-3 border border-blue-300 rounded-lg"/>
-    {#if searchQuery !== ''}
-      <ul class="dropdown-menu absolute left-0 right-0 bg-white border border-gray-300 mt-1 z-10 max-h-60 overflow-y-auto">
-        {#each filteredPages as page}
-          <li>
-            <button type="button" class="dropdown-item w-full text-left px-4 py-2 cursor-pointer hover:bg-blue-100" on:click={() => selectPageFromDropdown(page)}>
-              {page.title}
-            </button>
-          </li>
-        {/each}
-      </ul>
-    {/if}
-  </div>
-</header>
-
-<aside class="fixed top-4 left-0 z-40 w-60 h-screen mt-16">
-  <div class="bg-light-blue overflow-y-auto py-5 px-3 h-full border-r border-blue-200">
-    <ul class="space-y-2">
-      {#each filteredPages as page, index}
-        <li>
-          <button on:click={() => selectPage(index)} class="{index == currentPageIndex ? 'bg-dark-blue' : ''} py-2 px-3 text-gray-900 rounded-lg">{page.title}</button>
-          <button on:click={() => deletePage(index)} class="ml-2 text-red-500">❌</button>
-        </li>
-      {/each}     
-      <li class="text-center"><button on:click={addPage} class="font-medium">+ Add Page</button></li>
-    </ul>
-  </div>
-</aside>
-
-<main class="p-4 ml-60 h-auto">
-  <div class="grid grid-cols-2 items-center mb-3">
-    <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}></h1>
-    <button class="ml-auto bg-blue-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-blue-900" on:click={saveNote}>Save</button>
-  </div>
-  <hr/>  
-  <textarea class="mt-3 block w-full bg-gray-50 border border-blue-300 rounded-lg text-gray-900 p-2.5" bind:value={note}></textarea>
-</main>
-
 <style>
-  .bg-light-blue {
-    background: #B3C8ED;
+  .container {
+    padding: 2em;
   }
-
-  .bg-dark-blue {
-    background: #3E7FF1;
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1em;
   }
-
-  .dropdown-menu {
-    max-height: 200px;
-    overflow-y: auto;
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 0.25rem;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  .header .title {
+    font-size: 2em;
   }
-
-  .dropdown-item {
-    padding: 0.5rem 1rem;
+  .header .title input {
+    font-size: 1em;
+    padding: 0.2em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  .header .actions {
+    display: flex;
+    gap: 1em;
+  }
+  .new-note {
+    display: flex;
+    margin-bottom: 1em;
+  }
+  .new-note input {
+    flex: 1;
+    padding: 0.5em;
+    font-size: 1em;
+    margin-right: 1em;
+  }
+  .new-note button {
+    padding: 0.5em 1em;
+    font-size: 1em;
     cursor: pointer;
   }
-
-  .dropdown-item:hover {
-    background: #f8f9fa;
+  .notes {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .page-list {
+    margin-top: 2em;
+  }
+  .page-list button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0.5em 0;
+    padding: 0.5em;
+    cursor: pointer;
+  }
+  .delete-page-button {
+    background-color: #ff4d4d;
+    border: none;
+    color: white;
+    padding: 0.3em;
+    border-radius: 4px;
+    cursor: pointer;
   }
 </style>
+
+<div class="container">
+  <div class="header">
+    <div class="title">
+      <input type="text" bind:value={currentPage.title} placeholder="Enter page title" />
+    </div>
+    <div class="actions">
+      <button on:click={createNewPage}>New Page</button>
+    </div>
+  </div>
+  <div class="new-note">
+    <input
+      type="text"
+      bind:value={newNoteText}
+      placeholder="Enter a new note"
+      on:keydown={(e) => { if (e.key === 'Enter') addNote(); }}
+    />
+    <button on:click={addNote}>Save Note</button>
+  </div>
+  <div class="notes">
+    {#each currentPage.notes as note (note.id)}
+      <StickyNote {note} onDelete={deleteNote} />
+    {/each}
+  </div>
+  <div class="page-list">
+    <h3>Previous Pages</h3>
+    {#each pages as page (page.id)}
+      <div>
+        <button on:click={() => loadPage(page)}>{page.title}</button>
+        <button class="delete-page-button" on:click={() => deletePage(page.id)}>Delete</button>
+      </div>
+    {/each}
+  </div>
+</div>
