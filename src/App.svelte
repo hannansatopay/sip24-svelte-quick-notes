@@ -67,15 +67,13 @@
   }
 </script>
 
-<aside class="fixed top-0 left-0 z-0 w-60 h-screen">
-  <div class="bg-light-gray overflow-y-auto py-5 px-3 h-full border-r border-gray-200">
+<aside class="fixed top-0 w-60 left-0 h-screen ">
+  <div class="bg-light-gray py-5 px-2.5 overflow-y-auto h-full borer-r border-gray-200">
     <ul class="space-y-2">
-      {#each pages as page, index}
-      <li>
-        <button on:click={() => selectPage(index)} class="bg-dark-gray py-2 px-3 text-gray-900 rounded-lg">{page.title}</button>
-      </li>
+      {#each pages as page, index }
+        <li><button on:click={()=>selectPage(index)} class="{index==currentPageIndex ? "bg-dark-gray" : ''} text-gray-900 rounded-lg px-2 py-3">{page.title}</button></li>
       {/each}
-      <li class="text-center"><button on:click={addPage} class="font-medium text-white">+ Add Page</button></li>
+      <li class="text-center"><button on:click={addPage} class="font-medium">+Add Page</button></li>
     </ul>
   </div>
 </aside>
@@ -83,26 +81,22 @@
 <main class="p-4 ml-60 h-auto">
   <div class="grid grid-cols-2 items-center mb-3">
     <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}></h1>
-    <div class="flex justify-end">
-      <button on:click={saveNote} class="ml-auto bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-900">Save</button>
+    <div class="ml-auto">
+      <button on:click={deletePage} class="bg-white-700 hover:bg-red-100 text-red-600 text-size-sm border border-red-400 rounded-lg px-5 py-2.5 mt-3 ">Delete</button>
+      <button on:click={saveNote} class="bg-gray-700 hover:bg-gray-900 text-white text-size-sm rounded-lg px-5 py-2.5 mt-3 ">Save</button>
     </div>
+
   </div>
   <hr/>
-  <textarea class="mt-3 block w-full bg-gray-50 border border-gray-300 rounded-lg text-gray-900 p-2.5" bind:value={note}></textarea>
+  <textarea class="block w-full border border-gray-300 bg-gray-50 rounded-lg p-2 mt-3" bind:value={note} placeholder="enter your note"></textarea>
+
 </main>
 
 <style>
-  :global(body) {
-    background-color: #a9b5e7;
-    margin: 0;
-    font-family: Arial, sans-serif;
+  .bg-light-gray{
+    background:#FBFBFB;
   }
-
-  .bg-light-gray {
-    background: #fbfbfb;
-  }
-
-  .bg-dark-gray {
+  .bg-dark-gray{
     background: #efefef;
   }
 
