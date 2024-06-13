@@ -1,19 +1,19 @@
 <script>
-  import { onMount } from 'svelte';
-  import Dexie from 'dexie';
+  import { onMount } from "svelte";
+  import Dexie from "dexie";
 
   // Define the Dexie database
-  const db = new Dexie('HandyNotes');
+  const db = new Dexie("HandyNotes");
   db.version(1).stores({
-    pages: '++id,title',
-    notes: 'title,note'
+    pages: "++id,title",
+    notes: "title,note"
   });
 
   let pages = [];
   let currentPageIndex = 0;
-  let title = ''; 
-  let note = '';
-  let searchQuery = '';
+  let title = ""; 
+  let note = "";
+  let searchQuery = "";
   let filteredPages = [];
 
   onMount(async () => {
@@ -28,26 +28,26 @@
 
   // Load all pages
   async function loadPages() {
-    pages = await db.table('pages').toArray();
+    pages = await db.table("pages").toArray();
   }
 
   // Save the note
   async function saveNote() {
     const currentPage = pages[currentPageIndex];
     if (currentPage.title !== title) {
-      await db.table('notes').delete(currentPage.title);
+      await db.table("notes").delete(currentPage.title);
       currentPage.title = title;
-      await db.table('pages').put(currentPage);
+      await db.table("pages").put(currentPage);
     }
-    await db.table('notes').put({ title, note });
+    await db.table("notes").put({ title, note });
     await loadPages();
     filteredPages = pages;
   }
 
   // Add a new page
   async function addPage() {
-    const newPage = { title: 'New Page' };
-    await db.table('pages').add(newPage);
+    const newPage = { title: "New Page" };
+    await db.table("pages").add(newPage);
     await loadPages();
     await selectPage(pages.length - 1);
   }
@@ -57,15 +57,15 @@
     currentPageIndex = index;
     const currentPage = pages[currentPageIndex];
     title = currentPage.title;
-    const noteData = await db.table('notes').get(title);
-    note = noteData ? noteData.note : '';
+    const noteData = await db.table("notes").get(title);
+    note = noteData ? noteData.note : "";
   }
 
   // Delete a page
   async function deletePage(index) {
     const pageToDelete = pages[index];
-    await db.table('pages').delete(pageToDelete.id);
-    await db.table('notes').delete(pageToDelete.title);
+    await db.table("pages").delete(pageToDelete.id);
+    await db.table("notes").delete(pageToDelete.title);
     await loadPages();
     if (pages.length === 0) {
       await addPage();
@@ -84,7 +84,7 @@
     const index = pages.findIndex(p => p.title === page.title);
     if (index !== -1) {
       selectPage(index);
-      searchQuery = '';
+      searchQuery = "";
       filteredPages = pages;
     }
   }
@@ -99,7 +99,7 @@
       bind:value={searchQuery} 
       on:input={searchPages} 
       class="w-full py-2 px-3 border border-blue-300 rounded-lg"/>
-    {#if searchQuery !== ''}
+    {#if searchQuery !== ""}
       <ul class="dropdown-menu absolute left-0 right-0 bg-white border border-gray-300 mt-1 z-10 max-h-60 overflow-y-auto">
         {#each filteredPages as page}
           <li>
