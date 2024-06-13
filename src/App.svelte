@@ -63,7 +63,9 @@
           <button on:click={()=>selectPage(index)} class="{index == currentPageIndex ? 'bg-dark-gray' : ''} w-full rounded-lg py-2 px-3 text-gray-900 text-white">{page}</button>
       </li>
       {/each}
-      <li class="text-centre"><button on:click={addPage} class="front-medium text-white">+ Add Page</button></li>
+main
+      <li class="text-centre"><button on:click={addPage} class="front-medium text-white">+Add Page</button></li>
+main
     </ul>
   </div>
 </aside>
@@ -72,8 +74,10 @@
   <div class="grid grid-cols-2 item-center mb-3">
     <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}></h1>
     <div class="flex justify-end">
-     <button on:click={saveNote} class="mr-2 w-20 border border-gray-50 bg-green-500 rounded-lg text-white font-medium hover:bg-green-600 px-5 py-2.5">Save</button>
-     <button on:click={deletePage} class="w-20 border border-gray-50 bg-red-500 rounded-lg text-white font-medium hover:bg-red-600 px-4 py-2.5">Delete</button>
+main
+     <button on:click={saveNote} class="mr-2 w-20 border border-gray-50 bg-green-600 rounded-lg text-white font-medium hover:bg-green-400 px-5 py-2.5">Save</button>
+     <button on:click={deletePage} class="w-20 border border-gray-50 bg-red-600 rounded-lg text-white font-medium hover:bg-red-400 px-4 py-2.5">Delete</button>
+main
     </div>
   </div>
   <hr/>
@@ -83,8 +87,7 @@
 
 <style>
 .bg-light-gray{
-  background-color: rgb(204, 153, 255);
-}
+
 .bg-dark-gray{
   background-color: rgb(204, 204, 255);
 }
@@ -96,3 +99,18 @@ hr {
             background: rgb(16, 16, 16);
         }
 </style>
+
+  background-color: rgb(50, 4, 70);
+}
+.bg-dark-gray{
+  background-color: rgb(76, 9, 85);
+}
+
+hr {
+            top: 20px;
+            bottom: 20px;
+            height: 2px;
+            background: rgb(16, 16, 16);
+        }
+</style>
+main
