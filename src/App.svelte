@@ -1,60 +1,59 @@
 <script>
   import { onMount } from 'svelte';
+  import { saveNoteToDB, loadNoteFromDB, deleteNoteFromDB, savePagesToDB, loadPagesFromDB } from './db.js';
 
   let pages = [];
   let currentPageIndex = 0;
   let title = '';
   let note = '';
 
-  onMount(() => {
-    const savedPages = localStorage.getItem("pages");
-    if (savedPages) {
-      pages = JSON.parse(savedPages);
+  onMount(async () => {
+    pages = await loadPagesFromDB();
+    if (pages.length > 0) {
       title = pages[currentPageIndex];
-      note = localStorage.getItem(title);
+      note = await loadNoteFromDB(title);
     } else {
       addPage();
     }
   });
 
-  function saveNote() {
+  async function saveNote() {
     const storedPageName = pages[currentPageIndex];
-    if (storedPageName != title) {
-      localStorage.removeItem(storedPageName);
+    if (storedPageName !== title) {
+      await deleteNoteFromDB(storedPageName);
       pages[currentPageIndex] = title;
     }
-    localStorage.setItem(title, note);
-    localStorage.setItem("pages", JSON.stringify(pages));
+    await saveNoteToDB(title, note);
+    await savePagesToDB(pages);
   }
 
   function addPage() {
-    pages.push("New Page");
-    selectPage(pages.length ? pages.length - 1 : 0);
+    const newPageTitle = "New Page";
+    pages = [...pages, newPageTitle];
+    selectPage(pages.length - 1);
   }
 
-  function selectPage(index) {
+  async function selectPage(index) {
     currentPageIndex = index;
     title = pages[currentPageIndex];
-    note = localStorage.getItem(title) || '';
+    note = await loadNoteFromDB(title);
   }
 
-
-  //Additional task to delete the note
-  //To delete the note - 1. Select the Note to be deleted.
-  //                     2. Clack on the Delete button.
-  //An alert box will be popped up after deleting a Note.
-
-  function deleteNote() {
+  async function deleteNote() {
     const pageToDelete = pages[currentPageIndex];
-    localStorage.removeItem(pageToDelete);
-    pages.splice(currentPageIndex, 1);
+    await deleteNoteFromDB(pageToDelete);
+    
+    pages = pages.filter((_, index) => index !== currentPageIndex);
+
     if (pages.length === 0) {
       addPage();
     } else {
-      selectPage(currentPageIndex > 0 ? currentPageIndex - 1 : 0);
+      currentPageIndex = currentPageIndex >= pages.length ? pages.length - 1 : currentPageIndex;
+      title = pages[currentPageIndex];
+      note = await loadNoteFromDB(title);
     }
-    localStorage.setItem("pages", JSON.stringify(pages));
-    alert(`The Note with the title '${pageToDelete}' has been deleted.`);
+
+    await savePagesToDB(pages);
   }
 </script>
 
@@ -63,10 +62,13 @@
     <ul class="space-y-2">
       <li class="text-center"><button on:click={addPage} class="font-medium">+ Add page</button></li>
       {#each pages as page, index}
-      <li>
-        <button on:click={() => selectPage(index)} class="{index == currentPageIndex ? 'bg-dark-gray' : ''} py-2 px-3 text-gray-900 rounded-lg">{page}</button>
-      </li>
-      {/each} 
+        <li>
+          <button on:click={() => selectPage(index)} class="{index === currentPageIndex ? 'bg-dark-gray' : ''} py-2 px-3 text-gray-900 rounded-lg">
+            {page}
+          </button>
+        </li>
+      {/each}
+      
     </ul>
   </div>
 </aside>
@@ -75,21 +77,20 @@
   <div class="grid grid-cols-2 items-center mb-3">
     <h1 class="text-2xl font-bold" contenteditable bind:textContent={title}></h1>
     <div class="ml-auto flex space-x-4">
-      <button class="bg-red-700 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-4 hover:bg-red-800" on:click={deleteNote}>Delete</button>
+      <button class="bg-red-600 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-4 hover:bg-red-700" on:click={deleteNote}>Delete</button>
       <button class="bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-4 hover:bg-blue-800" on:click={saveNote}>Save</button>
     </div>
   </div>
   <hr />
-  <textarea class="mt-4 block w-full bg-blue-50 border-blue-300 rounded-lg text-gray-900 p-2.5 hover:bg-blue-100" bind:value={note}></textarea>
+  <textarea class="mt-4 block w-full bg-gray-50 border-gray-300 rounded-lg text-gray-900 p-2.5 hover:bg-gray-100" bind:value={note}></textarea>
 </main>
 
 <style>
   .bg-light-gray {
-    --tw-bg-opacity: 1;
-    background-color: rgb(235 245 255 / var(--tw-bg-opacity));
+    background: #fbfbfb;
   }
 
   .bg-dark-gray {
-    background: #93b8f8;
+    background: #89b3fb;
   }
 </style>
