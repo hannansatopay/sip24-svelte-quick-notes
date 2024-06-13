@@ -29,13 +29,10 @@
     localStorage.setItem(title, note);
     localStorage.setItem("papers", JSON.stringify(pages));
   }
-
-
   function addPage() {
     pages.push("New Page");
     selectPage(pages.length ? pages.length - 1 : 0);
-    // localStorage.setItem(title, note);
-    // localStorage.setItem("pages", JSON.stringify(pages));
+
   }
   function selectPage(index){
     currentPageIndex =index;
