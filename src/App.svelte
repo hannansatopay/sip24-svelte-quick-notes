@@ -8,7 +8,7 @@
   let note = '';
   let db;
 
-  async function initDB() {
+  function initDB() {
     db = await openDB('notesDB', 1, {
       upgrade(db) {
         db.createObjectStore('notes', { keyPath: 'title' });
@@ -16,7 +16,7 @@
     });
   }
 
-  async function loadNotes() {
+  function loadNotes() {
     const allNotes = await db.getAll('notes');
     if (allNotes.length) {
       pages = allNotes.map(note => note.title);
@@ -32,7 +32,7 @@
     await loadNotes();
   });
 
-  async function saveNote() {
+  function saveNote() {
     const storedPageName = pages[currentPageIndex];
     if (storedPageName != title) {
       await db.delete('notes', storedPageName);
@@ -42,13 +42,13 @@
     await db.put('notes', { title: 'pages', content: JSON.stringify(pages) });
   }
 
-  async function addPage() {
+  function addPage() {
     pages.push("New Page");
     await saveNote();
     selectPage(pages.length ? pages.length - 1 : 0);
   }
 
-  async function deletePage(index) {
+  function deletePage(index) {
     const pageTitle = pages[index];
     await db.delete('notes', pageTitle);
     pages.splice(index, 1);
@@ -60,7 +60,7 @@
     await db.put('notes', { title: 'pages', content: JSON.stringify(pages) });
   }
 
-  async function selectPage(index) {
+  function selectPage(index) {
     currentPageIndex = index;
     title = pages[currentPageIndex];
     note = (await db.get('notes', title)).content;
