@@ -3,22 +3,22 @@
 
   let pages = [];
   let currentPageIndex = 0;
-  let title = "New Note";
-  let note = "Today is an excellent day!";
+  let title = '';
+  let note = '';
 
   onMount(() => {
 
     const savePages = localStorage.getItem("pages");
     if(savePages) {
       pages = JSON.parse(savePages);
-      title = pages(currentPageIndex);
+      title = pages[currentPageIndex];
       note = localStorage.getItem(title);
     }
     else{
       addPage();
     }
-    title = localStorage.getItem("title");
-    note = localStorage.getItem("note");
+    //title = localStorage.getItem("title");
+    //note = localStorage.getItem("note");
   });
 
   function deletePage() {
