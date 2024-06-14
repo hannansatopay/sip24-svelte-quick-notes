@@ -16,12 +16,26 @@
     else{
       addPage();
     }
+    
+    const deletePages=localStorage.removeItem("pages")
+    removePage();
   });
 
   function saveNote(){
     pages[currentPageIndex]=title;
     localStorage.setItem(title,note);
     localStorage.setItem("pages",JSON.stringify(pages));
+  }
+
+  function deleteNote(){
+    removePage();
+    localStorage.removeItem(title);
+    localStorage.removeItem("pages");
+  }
+
+  function removePage(){
+    pages.pop();
+    pages=pages;
   }
 
   function addPage(){
@@ -59,6 +73,7 @@
   
   <textarea class="mt-3 block w-full bg-gray-50 border border-gray-300 rounded-lg text-gray-900" bind:value={note}></textarea>
   <button class="mt-3 bg-gray-800 rounded-lg text-white px-5 py-1 font-medium text-small hover:bg-red-600" on:click={saveNote}>save</button>
+  <button class="mt-3 bg-gray-800 rounded-lg text-white px-4 py-1 font-medium text-small hover:bg-red-600" on:click={deleteNote}>Delete</button>
 </main>
 
 <style>
