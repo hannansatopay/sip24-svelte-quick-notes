@@ -16,19 +16,26 @@ if(savedPages) {
    addPage();
 }
 });
+
 function saveNote() {
-   pages[currentPageIndex]=Title;
+   const storedPageName = pages[currentPageIndex];
+   if (storedPageName!= Title){
+      localStorage.removeItem(storedPageName);
+      pages[currentPageIndex]=Title;
+   }
    localStorage.setItem('Title',note);
    localStorage.setItem("pages",JSON.stringify(pages));
 }
+
 function addPage() {
    pages.push("New Page");
   selectPage(pages.length ? pages.length-1:0);
 }
+
 function selectPage(index) {
+   currentPageIndex = index;
    Title = pages[currentPageIndex];
    note=localStorage.getItem(Title);
-
 }
 </script> 
 
@@ -37,9 +44,7 @@ function selectPage(index) {
       <ul class="space-y-2">
          {#each pages as page, index}
          <li> 
-        
            <button on:click={() =>selectPage(index)} class="bg-dark-gray py-2  px-3 text-gray-900 rounded-lg">{Title || "New Page"}</button>
-        
          </li>
         {/each}
       <li class="text-center"><button on:click={addPage} class="font-medium">+Add Page</button></li>
@@ -54,13 +59,8 @@ function selectPage(index) {
 </div>
  <hr/>
 <textarea class="mt-3 block w-full bg-gray-50 border border-gray-300 rounded-lg text-gray-900 p-2.5"bind:value={note}></textarea>
-
 </main>
  
-
-
-
-
 <style>
  .bg-light-gray{
    background:#FBFBFB ;
