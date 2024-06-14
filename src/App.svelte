@@ -1,7 +1,5 @@
 <script>
-  import { onMount } from 'svelte';
-  // @ts-ignore
-  import { openDB } from 'idb';
+  import {onMount} from 'svelte';
 
   let pages = [];
   let currentPageIndex = 0;
