@@ -1,6 +1,5 @@
 <script>
-  import { onMount } from 'svelte';
-  import { openDB } from 'idb';
+  import {onMount} from 'svelte';
 
   let pages = [];
   let currentPageIndex = 0;
@@ -31,6 +30,7 @@
     const db = await dbPromise;
     const page = pages[currentPageIndex];
     page.title = title;
+    page.note = note;
     await db.put('pages', page);
     const allPages = await db.getAll('pages');
     pages = allPages;
@@ -50,7 +50,7 @@
     const page = pages[currentPageIndex];
     title = page.title;
     const db = await dbPromise;
-    const noteObj = await db.get('pages', page.id); // Corrected to use 'pages' object store
+    const noteObj = await db.get('pages', page.id);
     note = noteObj ? noteObj.note : "";
   }
 
@@ -60,8 +60,12 @@
       const page = pages[currentPageIndex];
       await db.delete('pages', page.id);
       pages.splice(currentPageIndex, 1);
-      if (currentPageIndex >= pages.length) {
+      if (pages.length === 0) {
+        await addPage();
+      } else if (currentPageIndex >= pages.length) {
         selectPage(pages.length - 1);
+      } else {
+        selectPage(currentPageIndex);
       }
     }
   }
@@ -107,8 +111,8 @@
   }
 
   hr {
-    top: 20px;
-    bottom: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
     height: 2px;
     background: rgb(16, 16, 16);
   }
