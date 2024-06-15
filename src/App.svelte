@@ -42,7 +42,7 @@
     const pageToDelete = pages[currentPage];
     localStorage.removeItem(pageToDelete);
     pages.splice(currentPage, 1);
-    pages = [...pages]; // Create a new array reference to trigger reactivity
+    pages = [...pages]; 
     localStorage.setItem("pages", JSON.stringify(pages));
 
     if (pages.length === 0) {
