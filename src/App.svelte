@@ -71,10 +71,10 @@
 
 <style>
  .bg-light-gray {
-  background: #FBFBFB;
+  background: #a86060;
  }
 .bg-dark-gray{
-  background: #EFEFEF;
+  background: #574fa0;
 }
 </style>
 
