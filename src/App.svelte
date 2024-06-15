@@ -1,5 +1,8 @@
 <script>
   import{onMount} from 'svelte';
+  // @ts-ignore
+  // @ts-ignore
+  import { createEventDispatcher } from "svelte";
 
   let pages=[];
   let currentPageIndex=0;
@@ -17,6 +20,8 @@
       addPage();
     }
     
+    // @ts-ignore
+    // @ts-ignore
     const deletePages=localStorage.removeItem("pages")
     removePage();
   });
@@ -29,8 +34,11 @@
 
   function deleteNote(){
     removePage();
-    localStorage.removeItem(title);
+    // @ts-ignore
+    title=localStorage.removeItem(title)
     localStorage.removeItem("pages");
+    // @ts-ignore
+    note=localStorage.removeItem(title)
   }
 
   function removePage(){
