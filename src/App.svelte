@@ -73,7 +73,7 @@
   <div class="flex items-center justify-between mb-4">
     <h1 class="text-3xl font-bold flex-grow" contenteditable bind:textContent={title}></h1>
     <button class=" bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-900" on:click={saveNote}>Save</button>
-    <button class="bg-red-600 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 ml-4 hover:bg-red-700" on:click={deleteCurrentPage}>Delete</button>
+    <button class="bg-red-600 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 ml-5 hover:bg-red-700" on:click={deleteCurrentPage}>Delete</button>
   </div>
   <hr/>
   <textarea class="mt-3 block w-full bg-gray-50 border border-gray-300 rounded-lg text-gray-900 p-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500" bind:value={note}></textarea>
