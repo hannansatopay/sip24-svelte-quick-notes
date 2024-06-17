@@ -1,14 +1,4 @@
 <script>
- 
-</script>
-
-<main>
-  Hello World
-</main>
-
-<style>
-
-</style>import {onMount} from 'svelte';
   let pages=[];
   let currentPageIndex =0;
   let title = '';
