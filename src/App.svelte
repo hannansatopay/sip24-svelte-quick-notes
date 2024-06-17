@@ -1,4 +1,5 @@
 <script>
+import {onMount} from 'svelte';
   let pages=[];
   let currentPageIndex =0;
   let title = '';
