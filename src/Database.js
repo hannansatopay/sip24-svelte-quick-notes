@@ -6,8 +6,8 @@ const STORE_NAME ='ToDo';
 const dbPromise = openDB(DB_NAME, 1, {
     upgrade(db){
         db.createObjectStore(STORE_NAME, { keyPath: 'title'});
-    },
-});
+    }
+})
 
 export async function getNotes() {
     const db = await dbPromise;
