@@ -3,7 +3,7 @@
 
   let pages= [];
   let currentPageIndex=0;
- let Title = ' ';
+ let Title =' ';
  let note = ' ';
 
  onMount(() => {
@@ -15,7 +15,19 @@
  } else {
   addPage();
  }
+
  })
+
+  onMount(()=> {
+    const deletepages =localStorage.getItem("pages");
+  if( deletepages) {
+    pages=JSON.parse(deletePages);
+  Title= pages[currentPageIndex];
+  note=localStorage.getItem(Title);
+ } else {
+  deletepage();
+  }
+  
  function SaveNote () {
    const storedPageName = pages[currentPageIndex];
    pages[currentPageIndex]=Title;
@@ -24,6 +36,11 @@
 
  }
 
+
+ function deletepage()
+ {
+   pages.p
+ }
  function addPage()
  {
    pages.push("New Pages");
