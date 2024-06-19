@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { getNotes,getNotesFromTitle,saveNote,deleteNoteFromTitle } from './Database';
+  import { getNotes,getNotesFromTitle,saveNote,deleteNoteFromTitle } from './Database.js';
 
   let pages = [];
   let currentPageIndex = 0;
@@ -20,12 +20,12 @@
   });
 
   async function saveCurrentNote() {
-    const storedPageName = pages[currentPageIndex];
+    const storedPageName = pages[currentPageIndex].title;
     if (storedPageName != title) {
-      await localStorage.removeNoteFromTitle(storedPageName);
+      await deleteNoteFromTitle(storedPageName);
       pages[currentPageIndex].title = title;
     }
-    pages[currentPageIndex].title = title;
+    pages[currentPageIndex].note = note;
     await saveNote({
       title: title,
       note: note
@@ -33,8 +33,8 @@
   }
 
   async function addPage() {
-    pages.push({title: "New Page",note: ''});
-    selectPage(pages.length ? pages.length - 1 : 0);
+    pages.push({title: 'New Page', note: ''});
+    selectPage(pages.length ? pages.length-1:0);
   }
 
   async function deletePage(index){
@@ -43,7 +43,7 @@
     }
     const deletedPageTitle = pages[index].title;
     await deleteNoteFromTitle(deletedPageTitle);
-    pages.splice(currentPageIndex,1);
+    pages.splice(index,1);
     if(pages.length === 0){
       addPage();
     }else{
@@ -54,8 +54,8 @@
     }
   }
 
-  function deleteCurrentPage(){
-    deletePage(currentPageIndex);
+  async function deleteCurrentPage(){
+    await deletePage(currentPageIndex);
   }
 
   async function selectPage(index) {
@@ -81,14 +81,14 @@
 
 <main class="p-4 ml-60 h-auto">
   <div class="grid grid-cols-2 items-center mb-3">
-    <h1 class="text-black text-3xl font-bold rounded-lg" contenteditable bind:textContent={title}></h1>
+    <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}></h1>
     <div class="ml-auto flex space-x-">
       <button class="ml-auto bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-blue-800" on:click={saveCurrentNote}>Save</button>
-      <button class="bg-green-600 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 ml-2 hover:bg-green-800" on:click={deleteCurrentPage}>Delete</button>
+      <button class="bg-green-600 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 ml-2 hover:bg-green-800" on:click={()=>deleteCurrentPage}>Delete</button>
     </div>    
   </div>
   <hr/>
-  <textarea class="text-2xl bg-emerald-200 hover:bg-emerald-300 border border-gray-300 text-black mt-3 block w-full rounded-lg p-2.5" bind:value={note}></textarea>
+  <textarea class="mt-3 block w-full bg-gray-50 border border-gray-300 rounded-lg text-gray-900 p-2.5" bind:value={note}></textarea>
 </main>
 
 <style>
