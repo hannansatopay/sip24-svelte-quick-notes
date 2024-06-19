@@ -1,48 +1,76 @@
+
+
 <script>
+  import { onMount } from 'svelte';
+  import { getPages, saveNote, deleteNote, addPage, updatePageTitle } from "./indexdb";
 
-import{onMount} from 'svelte';
-
+  let title = '';
+  let note = '';
   let pages = [];
   let currentPageIndex = 0;
-  let title =''
-  let note=''
 
-  onMount(() => { 
-    const savedPages = localStorage.getItem("pages");
-    if (savedPages){
-      pages= JSON.parse(savedPages);
-      title= pages(currentPageIndex);
-      note= localStorage.getItem(title);
-
-    }else{
-      addPage();
-
+  onMount(async () => {
+    try {
+      pages = await getPages();
+      if (pages.length === 0) {
+        await addPage('New Page');
+        pages = await getPages();
+      }
+      selectPage(currentPageIndex);
+    } catch (error) {
+      console.error("Error initializing pages:", error);
     }
   });
 
-  function savenotes(){
-    const storedPageName =pages[currentPageIndex];
-    if (storedPageName != title){
-      localStorage.removeItem(storedPageName);
-    pages[currentPageIndex]= title;
+  async function save() {
+    try {
+      await saveNote(pages[currentPageIndex].id, note);
+      pages = await getPages();
+    } catch (error) {
+      console.error("Error saving note:", error);
     }
-    localStorage.setItem(title,note);
-    localStorage.setItem('pages',JSON.stringify(pages));
-
   }
 
-  function addPage(){
-    pages[currentPageIndex]=title;
-    pages.push("New Page");
-    selectPage(pages.length ? pages.length-1:0)
+  async function remove() {
+    try {
+      await deleteNote(pages[currentPageIndex].id);
+      pages = await getPages();
+      if (pages.length === 0) {
+        await addPage('New Page');
+        pages = await getPages();
+      }
+      currentPageIndex = (pages.length-1 < 0) ? 0 : pages.length-1;
+      selectPage(currentPageIndex);
+    } catch (error) {
+      console.error("Error deleting note and page:", error);
+    }
+  }
+
+  async function add() {
+    try {
+      await addPage('New Page');
+      pages = await getPages();
+      currentPageIndex = pages.length - 1;
+       selectPage(currentPageIndex);
+    } catch (error) {
+      console.error("Error adding page:", error);
+    }
+  }
+
+  async function updateTitle(event) {
+    try {
+      let newTitle = event.target.textContent;
+      await updatePageTitle(pages[currentPageIndex].id, newTitle);
+      pages[currentPageIndex].title = newTitle;
+    } catch (error) {
+      console.error("Error updating title:", error);
+    }
   }
 
   function selectPage(index) {
-
-    currentPageIndex=index;
-    title=pages[currentPageIndex];
-    note= localStorage.getItem(title);
-
+    currentPageIndex = index;
+    title = pages[currentPageIndex].title || "New Page";
+    note = pages[currentPageIndex].note || "";
   }
 </script>
 
@@ -50,33 +78,67 @@ import{onMount} from 'svelte';
   <div class="bg-light-gray overflow-y-auto py-5 px-3 h-full border-r border-gray-200">
     <ul class="space-y-2">
       {#each pages as page, index}
-        <li>
-        <button on:click={() =>selectPage(index)} class="{index== currentPageIndex?'bg-dark-gray': ''}bg-dark-gray py-2 px-3 text-gray-900 rounded-lg">{page}</button>
+        <li class="relative">
+          <div class="title-wrapper">
+            <button on:click={() => selectPage(index)} class="title-button {index === currentPageIndex ? 'bg-dark-gray' : ''} py-2 px-3 text-gray-900 rounded-lg">{page.title}</button>
+          </div>
+          <button class="delete-btn bg-gray-800 text-white px-5 py-2.5 rounded-md font-medium text-sm hover:bg-blue-800" on:click={remove}>Delete</button>
         </li>
-        {/each}
-      <li class="text-center"><button on:click={addPage} class="font-medium">+ Add Page</button></li>
+      {/each}
+      <li class="text-center">
+        <button class="font-medium py-2.5" on:click={() => add()}>+Add Page</button>
+      </li>
     </ul>
   </div>
 </aside>
 
-<main class="p-4 ml-60 h-auto">
-  <div class="grid grid-cols-2 item-center mb-3">
-    <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}> </h1>
-  <button class="ml-auto bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg.gray-2000" on:click={savenotes}>save</button>
 
+<main class="p-4 ml-60 h-auto">
+  <div class="flex justify-between items-center mb-3">
+    <h1 class="text-3xl font-bold" contenteditable on:blur={updateTitle}>{title}</h1>
+    <div>
+      <button class="bg-gray-800 ml-auto text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-blue-900" on:click={save}>Save</button>
+    </div>
   </div>
-  <hr/>
-  <textarea class="mt-3 block w-full bg-gray-50 border-gray-300 rounded-lg text-gray-900 p-2.5" bind:value={note}></textarea>
+  <textarea class="mt-3 block w-full bg-gray-50 border border-gray-300 rounded-lg text-gray-900 p-2.5" bind:value={note}></textarea>
 </main>
 
 <style>
-  .bg-light-gray{
+  .bg-light-gray {
     background: #FBFBFB;
   }
 
-  .bg-dark-gray{
+  .bg-dark-gray {
     background: #EFEFEF;
   }
+  .relative {
+    position: relative;
+  }
 
+  .title-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    max-width: calc(100% - 80px);
+  }
 
+  .title-button {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 10px; 
+  }
+
+  .title-wrapper:hover .title-button {
+    overflow: visible;
+    white-space: normal;
+  }
+
+  .delete-btn {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+  }
 </style>
