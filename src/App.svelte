@@ -84,7 +84,7 @@
     <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}></h1>
     <div class="ml-auto flex space-x-">
       <button class="ml-auto bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-blue-800" on:click={saveCurrentNote}>Save</button>
-      <button class="bg-green-600 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 ml-2 hover:bg-green-800" on:click={()=>deleteCurrentPage}>Delete</button>
+      <button class="bg-green-600 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 ml-2 hover:bg-green-800" on:click={deleteCurrentPage}>Delete</button>
     </div>    
   </div>
   <hr/>
