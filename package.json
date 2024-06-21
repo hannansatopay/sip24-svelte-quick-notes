@@ -14,12 +14,16 @@
     "flowbite": "^2.3.0",
     "flowbite-svelte": "^0.46.1",
     "postcss": "^8.4.38",
-    "svelte": "^4.2.12",
+    "svelte": "^4.2.18",
     "tailwindcss": "^3.4.3",
     "vite": "^5.2.0"
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
     "tailwind-merge": "^2.3.0"
-  }
+  },
+  "description": "We are excited to welcome you to the Svelte Fundamentals course, a key part of the Summer Internship Program 2024. In this tutorial, you'll learn the basics of Svelte by building a simple note application. This project will help you understand the core concepts of Svelte while creating a functional quick notes app.",
+  "main": "postcss.config.js",
+  "author": "",
+  "license": "ISC"
 }
