@@ -42,7 +42,19 @@
     note = localStorage.getItem(title) || '';
   }
 
- 
+  // Delete the note
+  function deletePage() {
+    if (pages.length > 0) {
+      const pageToDelete = pages.splice(currentPageIndex, 1)[0];
+      localStorage.removeItem(pageToDelete);
+      if (currentPageIndex >= pages.length) {
+        currentPageIndex = pages.length - 1;
+      }
+      title = pages[currentPageIndex];
+      note = localStorage.getItem(title) || '';
+      localStorage.setItem("pages", JSON.stringify(pages));
+    } 
+  }
 </script>
 
 <aside class="fixed top-0 left-0 z-40 w-60 h-screen shadow-lg">
@@ -62,6 +74,7 @@
   <div class="grid grid-cols-2 items-center mb-3">
     <h1 class="text-3xl font-bold text-gray-900 bg-main-heading p-2 rounded-lg shadow-inner" contenteditable bind:textContent={title}></h1>
     <div class="ml-auto">
+      <button class="bg-red-500 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-red-600 shadow transition duration-200" on:click={deletePage}>Delete</button>
       <button class="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-blue-700 shadow transition duration-200" on:click={savenote}>Save</button>
     </div>
   </div>
