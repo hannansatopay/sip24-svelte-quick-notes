@@ -112,7 +112,7 @@
     background: #445ffa;
   }
   .bg-darker-blue {
-    background: #600ecc;
+    background: #5c08ca;
   }
   body {
     font-family: "Times New Roman", serif;
