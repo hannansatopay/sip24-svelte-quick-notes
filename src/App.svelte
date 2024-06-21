@@ -55,31 +55,30 @@
 </script>
 
 <aside class="fixed top-0 left-0 z-40 w-60 h-screen">
-  <div class="bg-light-gray overflow-y-auto py-5 px-3 h-full border-r border-gray-200">
+  <div class="bg-gradient-to-r from-indigo-500 to-fuchsia-500 overflow-y-auto py-5 px-3 h-full border-r border-gray-200">
     <ul class="space-y-2">
       {#each pages as page, index}
         <li>
           <button
             on:click={() => selectPage(index)}
-            class="{index == currentPageIndex ? 'bg-dark-gray' : ''} py-2 px-3 text-gray-900 rounded-lg"
+            class="{index == currentPageIndex ? 'bg-teal-400 text-white' : ''} py-2 px-3 rounded-lg"
           >
             {page}
             <button class="ml-2 text-red-500 hover:text-red-700" on:click={() => deletePage(index)}>
-              &#10006; 
-              
+              &#10006;
             </button>
           </button>
         </li>
       {/each}
-      <li class="text-center"><button on:click={addPage} class="font-medium">Add Page</button></li>
+      <li class="text-center"><button on:click={addPage} class="font-medium bg-orange-400 text-white">Add Page</button></li>
     </ul>
   </div>
 </aside>
 
 <main class="p-4 ml-60 h-auto">
   <div class="grid grid-cols-2 items-center mb-3">
-    <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}></h1>
-    <button class="ml-auto bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-gray-900" on:click={saveNote}>Save</button>
+    <h1 class="text-3xl font-bold text-purple-700" contenteditable bind:textContent={title}></h1>
+    <button class="ml-auto bg-lime-500 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-lime-700" on:click={saveNote}>Save</button>
   </div>
   <hr />
 
@@ -88,10 +87,5 @@
 </main>
 
 <style>
-  .bg-light-gray {
-    background: #FBFBFB;
-  }
-  .bg-dark-gray {
-    background: #EFEFEF;
-  }
+  
 </style>
