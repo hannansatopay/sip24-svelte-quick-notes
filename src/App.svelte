@@ -1,59 +1,59 @@
 <script>
   import { onMount } from 'svelte';
+  import { openDatabase, savePage, saveNote, getNotes, getPages, deletePage } from './db';
 
   let pages = [];
   let currentPageIndex = 0;
   let title = '';
   let note = '';
 
-  // Load saved pages and notes from local storage when the component mounts
-  onMount(() => {
-    const savedPages = localStorage.getItem("pages");
-    if (savedPages) {
-      pages = JSON.parse(savedPages);
-      title = pages[currentPageIndex] || "New Page";
-      note = localStorage.getItem(title) || '';
+  onMount(async () => {
+    const savedPages = await getPages();
+    if (savedPages.length > 0) {
+      pages = savedPages;
+      title = pages[currentPageIndex]?.title || "New Page";
+      const notes = await getNotes();
+      note = notes.find(n => n.title === title)?.content || '';
     } else {
       addPage();
     }
   });
 
-  // Save the current note to local storage
-  function savenote() {
-    const storedPageName = pages[currentPageIndex];
-    if (storedPageName != title) { // If the title has changed, update it
-      localStorage.removeItem(storedPageName);
-      pages[currentPageIndex] = title;
+  async function savenote() {
+    const storedPage = pages[currentPageIndex];
+    if (storedPage.title !== title) { // If the title has changed, update it
+      await deletePage(storedPage.title);
+      pages[currentPageIndex].title = title;
     }
-    localStorage.setItem(title, note);
-    localStorage.setItem("pages", JSON.stringify(pages));
+    await savePage({ id: pages[currentPageIndex].id, title });
+    await saveNote({ title, content: note });
   }
 
-  // Add a new page
-  function addPage() {
-    pages.push("New Page");
+  async function addPage() {
+    const newPage = { title: "New Page" };
+    await savePage(newPage);
+    pages.push(newPage);
     selectPage(pages.length - 1);
   }
 
-  // Select a page by index
-  function selectPage(index) {
+  async function selectPage(index) {
     currentPageIndex = index;
-    title = pages[currentPageIndex];
-    note = localStorage.getItem(title) || '';
+    title = pages[currentPageIndex].title;
+    const notes = await getNotes();
+    note = notes.find(n => n.title === title)?.content || '';
   }
 
-  // Delete the note
-  function deletePage() {
+  async function deletePageHandler() {
     if (pages.length > 0) {
       const pageToDelete = pages.splice(currentPageIndex, 1)[0];
-      localStorage.removeItem(pageToDelete);
+      await deletePage(pageToDelete.title);
       if (currentPageIndex >= pages.length) {
         currentPageIndex = pages.length - 1;
       }
-      title = pages[currentPageIndex];
-      note = localStorage.getItem(title) || '';
-      localStorage.setItem("pages", JSON.stringify(pages));
-    } 
+      title = pages[currentPageIndex]?.title || '';
+      const notes = await getNotes();
+      note = notes.find(n => n.title === title)?.content || '';
+    }
   }
 </script>
 
@@ -62,7 +62,7 @@
     <ul class="space-y-2">
       {#each pages as page, index}
         <li>
-          <button on:click={() => selectPage(index)} class="{index == currentPageIndex ? 'bg-active-page' : ''} py-2 px-3 text-gray-200 rounded-lg hover:bg-hover-page transition duration-200">{page}</button>
+          <button on:click={() => selectPage(index)} class="{index == currentPageIndex ? 'bg-active-page' : ''} py-2 px-3 text-gray-200 rounded-lg hover:bg-hover-page transition duration-200">{page.title}</button>
         </li>
       {/each}
       <li class="text-center"><button on:click={addPage} class="font-medium text-gray-200 hover:text-white transition duration-200"> + Add Page</button></li>
@@ -74,7 +74,7 @@
   <div class="grid grid-cols-2 items-center mb-3">
     <h1 class="text-3xl font-bold text-gray-900 bg-main-heading p-2 rounded-lg shadow-inner" contenteditable bind:textContent={title}></h1>
     <div class="ml-auto">
-      <button class="bg-red-500 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-red-600 shadow transition duration-200" on:click={deletePage}>Delete</button>
+      <button class="bg-red-500 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-red-600 shadow transition duration-200" on:click={deletePageHandler}>Delete</button>
       <button class="bg-blue-600 text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-blue-700 shadow transition duration-200" on:click={savenote}>Save</button>
     </div>
   </div>
