@@ -32,6 +32,7 @@
       pages[currentPageIndex] = title;
     }
     await db.put('notes', { title, content: note });
+    pages[currentPageIndex] = title;
   }
 
   function addPage() {
