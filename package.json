@@ -20,6 +20,11 @@
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
+<<<<<<< Updated upstream
+    "idb": "^8.0.0",
+=======
+    "dexie": "^4.0.7",
+>>>>>>> Stashed changes
     "tailwind-merge": "^2.3.0"
   }
 }
