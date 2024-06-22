@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { openDatabase, savePage, saveNote, getNotes, getPages, deletePage } from './db';
+  import { db, savePage, saveNote, getNotes, getPages, deletePage } from './db';
 
   let pages = [];
   let currentPageIndex = 0;
