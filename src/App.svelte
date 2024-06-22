@@ -1,33 +1,92 @@
 <script>
+  import { onMount } from 'svelte';
   import { writable } from 'svelte/store';
 
+  let db;
   let notes = writable([]);
-
   let newNoteTitle = '';
   let newNoteContent = '';
 
+  onMount(async () => {
+    const dbName = 'notepadDB';
+    const dbVersion = 1;
+
+    const request = indexedDB.open(dbName, dbVersion);
+
+    request.onerror = function(event) {
+      console.error('Database error:', event.target.errorCode);
+    };
+
+    request.onsuccess = function(event) {
+      db = event.target.result;
+      fetchNotes();
+    };
+
+    request.onupgradeneeded = function(event) {
+      db = event.target.result;
+      db.createObjectStore('notes', { keyPath: 'id', autoIncrement: true });
+    };
+  });
+
+  async function fetchNotes() {
+    const transaction = db.transaction(['notes'], 'readonly');
+    const store = transaction.objectStore('notes');
+    const request = store.getAll();
+
+    request.onsuccess = function(event) {
+      notes.set(event.target.result);
+    };
+
+    request.onerror = function(event) {
+      console.error('Error fetching notes:', event.target.error);
+    };
+  }
+
   function addNote() {
     if (newNoteTitle.trim() && newNoteContent.trim()) {
-      notes.update(n => [...n, { id: Date.now(), title: newNoteTitle, content: newNoteContent }]);
-      newNoteTitle = '';
-      newNoteContent = '';
+      const transaction = db.transaction(['notes'], 'readwrite');
+      const store = transaction.objectStore('notes');
+      const newNote = { title: newNoteTitle, content: newNoteContent };
+
+      const request = store.add(newNote);
+
+      request.onsuccess = function(event) {
+        notes.update(n => [...n, { id: event.target.result, ...newNote }]);
+        newNoteTitle = '';
+        newNoteContent = '';
+      };
+
+      request.onerror = function(event) {
+        console.error('Error adding note:', event.target.error);
+      };
     }
   }
 
   function deleteNote(id) {
-    notes.update(n => n.filter(note => note.id !== id));
+    const transaction = db.transaction(['notes'], 'readwrite');
+    const store = transaction.objectStore('notes');
+
+    const request = store.delete(id);
+
+    request.onsuccess = function(event) {
+      notes.update(n => n.filter(note => note.id !== id));
+    };
+
+    request.onerror = function(event) {
+      console.error('Error deleting note:', event.target.error);
+    };
   }
 </script>
 
 <main>
   <h1>Notepad</h1>
-  
+
   <div class="note-form">
     <input type="text" placeholder="Title" bind:value={newNoteTitle} />
     <textarea placeholder="Content" bind:value={newNoteContent}></textarea>
     <button on:click={addNote}>Add Note</button>
   </div>
-  
+
   <ul>
     {#each $notes as note (note.id)}
       <li>
@@ -46,7 +105,7 @@
     padding: 2rem;
     font-family: Arial, sans-serif;
   }
-  
+
   h1 {
     text-align: center;
   }
