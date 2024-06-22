@@ -65,7 +65,11 @@
     await db.delete('notes', pageTitle);
     await db.delete('pages', index);
     pages.splice(index, 1);
-    await db.put('pages', pages.map((title, i) => ({ index: i, title })));
+    
+    // Re-index the pages
+    for (let i = 0; i < pages.length; i++) {
+      await db.put('pages', { index: i, title: pages[i] });
+    }
     
     if (pages.length === 0) {
       addPage();
