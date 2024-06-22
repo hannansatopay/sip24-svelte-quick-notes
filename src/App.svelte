@@ -37,19 +37,33 @@
     title = pages[currentPageIndex];
     note = localStorage.getItem(title);
   }
+
+  function deletePage(index) {
+    const pageTitle = pages[index];
+    localStorage.removeItem(pageTitle);
+    pages.splice(index, 1);
+    localStorage.setItem("pages", JSON.stringify(pages));
+    
+    if (pages.length === 0) {
+      addPage();
+    } else {
+      selectPage(index > 0 ? index - 1 : 0);
+    }
+  }
 </script>
 
 <aside class="fixed top-0 left-0 z-40 w-60 h-screen">
-<div class="bg-light-gray overflow-y-auto py-5 px-3 h-full border-r border-gray-200">
-  <ul class="space-y-2">
-    {#each pages as page, index}
-    <li>
-        <button on:click={()=>selectPage(index)} class="{index == currentPageIndex ? 'bg-dark-gray' : ''} py-2 px-3 text-gray-900 rounded-lg">{page}</button>
-    </li>
-    {/each}
-    <li class="text-center"><button on:click={addPage} class="font-medium">+ Add page</button></li>
-  </ul>
-</div>
+  <div class="bg-light-gray overflow-y-auto py-5 px-3 h-full border-r border-gray-200">
+    <ul class="space-y-2">
+      {#each pages as page, index}
+        <li class="flex justify-between items-center">
+          <button on:click={() => selectPage(index)} class="{index == currentPageIndex ? 'bg-dark-gray' : ''} py-2 px-3 text-gray-900 rounded-lg">{page}</button>
+          <button on:click={() => deletePage(index)} class="ml-2 text-red-500 hover:text-red-700">Delete</button>
+        </li>
+      {/each}
+      <li class="text-center"><button on:click={addPage} class="font-medium">+ Add page</button></li>
+    </ul>
+  </div>
 </aside>
 
 <main class="p-4 ml-60 h-auto">
@@ -62,11 +76,11 @@
 </main>
 
 <style>
-.bg-light-gray {
-  background: #FBFBFB;
-}
+  .bg-light-gray {
+    background: #FBFBFB;
+  }
 
-.bg-dark-gray {
-  background: #EFEFEF;
-}
+  .bg-dark-gray {
+    background: #EFEFEF;
+  }
 </style>
