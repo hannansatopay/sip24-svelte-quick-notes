@@ -1,71 +1,91 @@
 <script>
   import { onMount } from 'svelte';
+  import Dexie from 'dexie';
 
- let pages = [];
- let currentPageIndex = 0;
- let title = '';
- let note = '';
+  // Initialize Dexie and create a database schema
+  const db = new Dexie('notesDatabase');
+  db.version(1).stores({
+    notes: '++id,title,note'
+  });
 
- onMount(()=> {
-  const savedPages = localStorage.getItem("pages");
-  if (savedPages) {
-    pages = JSON.parse(savedPages);
-    title = pages[currentPageIndex];
-    note = localStorage.getItem(title);
-   } else {
-    addPage();
- }
-});
+  let pages = [];
+  let currentPageIndex = 0;
+  let title = '';
+  let note = '';
 
- function saveNote()
- {
-  const storedPageName = pages[currentPageIndex];
-  if (storedPageName !== title)
-  {
-    localStorage.removeItem(storedPageName);
-    pages[currentPageIndex] = title; 
+  // Load all notes from the database on component mount
+  onMount(async () => {
+    try {
+      const savedPages = await db.notes.toArray();
+      if (savedPages.length > 0) {
+        pages = savedPages;
+        selectPage(0);
+      } else {
+        await addPage();
+      }
+    } catch (error) {
+      console.error('Failed to load notes:', error);
+    }
+  });
+
+  async function saveNote() {
+    try {
+      const currentNote = pages[currentPageIndex];
+      if (currentNote.title !== title || currentNote.note !== note) {
+        await db.notes.update(currentNote.id, { title, note });
+        pages[currentPageIndex] = { ...currentNote, title, note };
+      }
+    } catch (error) {
+      console.error('Failed to save note:', error);
+    }
   }
-  localStorage.setItem(title, note);
-  localStorage.setItem("pages",JSON.stringify(pages));
- }
 
- function addPage() {
-  pages.push("New Page");
-  selectPage(pages.length - 1); 
- }
-
- function selectPage(index) {
-  currentPageIndex = index;
-  title = pages[currentPageIndex];
-  note = localStorage.getItem(title);
- }
-
- function deleteNote() {
-  const titleToDelete = pages[currentPageIndex];
-  localStorage.removeItem(titleToDelete);
-  pages.splice(currentPageIndex, 1);
-  localStorage.setItem("pages", JSON.stringify(pages));
-
-  if (pages.length === 0) {
-    addPage();
-  } else {
-    currentPageIndex = Math.max(currentPageIndex - 1, 0);
-    selectPage(currentPageIndex);
+  async function addPage() {
+    try {
+      const id = await db.notes.add({ title: 'New Page', note: '' });
+      const newPage = { id, title: 'New Page', note: '' };
+      pages = [...pages, newPage];
+      selectPage(pages.length - 1);
+    } catch (error) {
+      console.error('Failed to add page:', error);
+    }
   }
- }
+
+  function selectPage(index) {
+    currentPageIndex = index;
+    title = pages[currentPageIndex]?.title || '';
+    note = pages[currentPageIndex]?.note || '';
+  }
+
+  async function deleteNote() {
+    try {
+      const noteId = pages[currentPageIndex].id;
+      await db.notes.delete(noteId);
+      pages = pages.filter((_, idx) => idx !== currentPageIndex);
+
+      if (pages.length === 0) {
+        await addPage();
+      } else {
+        currentPageIndex = Math.max(currentPageIndex - 1, 0);
+        selectPage(currentPageIndex);
+      }
+    } catch (error) {
+      console.error('Failed to delete note:', error);
+    }
+  }
 </script>
 
-<aside class="fixed top-0 left-0 z-40 w-60 h-screen">
-  <div class="bg-light-gray overflow-y-auto py-5 px-3 h-full border-r border-gray-200">
-    <ul class="space-y-2">
-      {#each pages as page, index}
+<aside class="fixed top-0 left-0 z-40 w-60 h-screen bg-light-gray overflow-y-auto py-5 px-3 h-full border-r border-gray-200">
+  <ul class="space-y-2">
+    {#each pages as page, index}
       <li>
-         <button on:click={()=>selectPage(index)} class="{ index == currentPageIndex ? 'bg-dark-gray' : '' } py-2 px-3 text-gray-900 rounded-lg">{page}</button>
+        <button on:click={() => selectPage(index)} class="{index === currentPageIndex ? 'bg-dark-gray' : ''} py-2 px-3 text-gray-900 rounded-lg">{page.title}</button>
       </li>
-      {/each}
-      <li class="text-center"><button on:click={addPage} class="font-medium">+Add Page</button></li>
-    </ul>
-  </div>
+    {/each}
+    <li class="text-center">
+      <button on:click={addPage} class="font-medium">+Add Page</button>
+    </li>
+  </ul>
 </aside>
 
 <main class="p-4 ml-60 h-auto">
