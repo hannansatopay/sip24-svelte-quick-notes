@@ -20,6 +20,9 @@
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
+    "db": "^6.0.3",
+    "dexie": "^4.0.7",
+    "idb": "^8.0.0",
     "tailwind-merge": "^2.3.0"
   }
 }
