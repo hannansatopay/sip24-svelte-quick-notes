@@ -19,9 +19,7 @@
     "vite": "^5.2.0"
   },
   "dependencies": {
-    "@fontsource/poppins": "^5.0.14",
     "@popperjs/core": "^2.11.8",
-    "@types/node": "^20.14.2",
     "tailwind-merge": "^2.3.0"
   }
 }
