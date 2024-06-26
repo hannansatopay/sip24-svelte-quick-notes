@@ -1,153 +1,102 @@
 <script>
-  import { onMount } from 'svelte';
+  import { onMount } from "svelte";
+  import { Dexie } from 'dexie';
+
+  // Initialize Dexie database
+  const db = new Dexie('NotesDatabase');
+  db.version(1).stores({
+    notes: 'title, note'
+  });
 
   let pages = [];
   let currentPageIndex = 0;
   let title = "";
   let note = "";
 
-  onMount(() => {
-    const savedPages = localStorage.getItem("pages");
-    if (savedPages) {
-      pages = JSON.parse(savedPages);
-      selectPage(currentPageIndex); // Ensure initial selection
-    } else {
-      addPage(); // Initialize with a new page if no pages are saved
+  // On mount, load existing pages from IndexedDB
+  onMount(async () => {
+    try {
+      const savedPages = await db.notes.toArray();
+      if (savedPages.length > 0) {
+        pages = savedPages.map(page => page.title);
+        selectPage(0); 
+      } else {
+        addPage(); 
+      }
+    } catch (error) {
+      console.error('Error loading notes:', error);
     }
   });
 
-  function saveNote() {
-    pages[currentPageIndex]=title;
-    localStorage.setItem(title, note);
-    localStorage.setItem("pages", JSON.stringify(pages));
-  }
-  
-  function addPage() {
-    pages.push("New Page");
-    selectPage(pages.length - 1); // Select the newly added page
+  // Save the current note
+  async function saveNote() {
+    const storedPageName = pages[currentPageIndex];
+    if (storedPageName !== title) {
+      await db.notes.delete(storedPageName); // Delete old entry if title has changed
+      pages[currentPageIndex] = title; // Update pages array
+    }
+    await db.notes.put({ title, note }); // Store or update the note in IndexedDB
+    pages[currentPageIndex] = title; // Update pages array
   }
 
-  function selectPage(index) {
+  // Add a new page
+  function addPage() {
+    const newPageTitle = `Page ${pages.length + 1}`;
+    pages.push(newPageTitle);
+    selectPage(pages.length - 1); 
+
+  // Select a specific page by index
+  async function selectPage(index) {
     currentPageIndex = index;
     title = pages[currentPageIndex];
-    note = localStorage.getItem(title) || ""; // Handle case where note is null
+    const page = await db.notes.get(title);
+    note = page ? page.note : ""; 
+  }
+
+  // Delete a page by index
+  async function deletePage(index) {
+    const pageToDelete = pages[index];
+    await db.notes.delete(pageToDelete); // Delete from IndexedDB
+    pages.splice(index, 1); // Remove from pages array
+
+    if (pages.length === 0) {
+      addPage(); // Add a new page if all pages are deleted
+    } else {
+      selectPage(index < pages.length ? index : pages.length - 1); // Select previous page
+    }
   }
 </script>
 
-<style>
-  /* Global Styles */
-  :global(body) {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f2f2f2;
-  }
+<main>
+  <!-- Sidebar with list of pages -->
+  <aside class="fixed top-0 left-0 z-40 w-60 h-screen">
+    <div class="bg-light-gray overflow-y-auto py-5 px-3 h-full border-r border-gray-200">
+      <ul class="space-y-2">
+        {#each pages as page, index}
+          <li>
+            <button on:click={() => selectPage(index)} class="{index === currentPageIndex ? 'bg-gray-200' : ''} py-2 px-3 text-gray-900 rounded-lg">
+              {page}
+            </button>
+            <button on:click={() => deletePage(index)} class="text-red-500 font-bold">X</button>
+          </li>
+        {/each}
+        <li class="text-center">
+          <button on:click={addPage} class="font-medium">+ New page</button>
+        </li>
+      </ul>
+    </div>
+  </aside>
 
-  /* Sidebar Styles */
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1000;
-    width: 240px;
-    height: 100vh;
-    background-color: #333;
-    color: #fff;
-    overflow-y: auto;
-    padding-top: 20px;
-  }
+  
+  <main class="p-4 ml-60 h-auto">
+    <div class="grid grid-cols-2 items-center nb-3">
+      <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}></h1>
+      <button class="ml-auto bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm-3 hover:bg-gray-900" on:click={saveNote}>
+        Save
+      </button>
+    </div>
+    <hr />
+    <textarea class="mt-3 block w-full bg-gray-50 border border-gray-300 rounded-lg text-gray-900 p-2.5" bind:value={note}></textarea>
+  </main>
+</main>
 
-  .sidebar ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .sidebar li {
-    margin-bottom: 8px;
-  }
-
-  .sidebar button {
-    width: 100%;
-    padding: 10px;
-    background-color: #555;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-
-  .sidebar button:hover {
-    background-color: #777;
-  }
-
-  .sidebar .add-button {
-    margin-top: 20px;
-  }
-
-  /* Main Content Styles */
-  .main-content {
-    margin-left: 240px; /* Same as sidebar width */
-    padding: 20px;
-  }
-
-  .main-content h1 {
-    font-size: 2rem;
-    margin-bottom: 10px;
-  }
-
-  .main-content hr {
-    border: none;
-    border-top: 1px solid #ddd;
-    margin: 20px 0;
-  }
-
-  .main-content input[type='text'],
-  .main-content textarea {
-    width: 100%;
-    padding: 10px;
-    font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #fff;
-    color: #333;
-    margin-bottom: 10px;
-  }
-
-  .main-content button {
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-
-  .main-content button:hover {
-    background-color: #0056b3;
-  }
-
-</style>
-
-<div class="sidebar">
-  <ul>
-    {#each pages as page, index }
-      <li>
-        <button on:click={() => selectPage(index)} class="{index === currentPageIndex ? 'active' : ''}">{page}</button>
-      </li>
-    {/each}
-    <li class="add-button">
-      <button on:click={addPage}>+ Add Page</button>
-    </li>
-  </ul>
-</div>
-
-<div class="main-content">
-  <h1 contenteditable bind:textContent={title}>{title || "New Page"}</h1>
-  <hr />
-  <input type='text' bind:value={title} placeholder="Enter title">
-  <textarea bind:value={note} placeholder="Add notes"></textarea>
-  <button on:click={saveNote}>Save</button>
-</div>
