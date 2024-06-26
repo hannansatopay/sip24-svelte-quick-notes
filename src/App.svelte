@@ -1,6 +1,6 @@
 <script>
   import { onMount } from "svelte";
-  import { Dexie } from 'dexie';
+  import Dexie from 'dexie';
 
   // Initialize Dexie database
   const db = new Dexie('NotesDatabase');
@@ -44,6 +44,7 @@
     const newPageTitle = `Page ${pages.length + 1}`;
     pages.push(newPageTitle);
     selectPage(pages.length - 1); 
+  }
 
   // Select a specific page by index
   async function selectPage(index) {
@@ -58,7 +59,6 @@
     const pageToDelete = pages[index];
     await db.notes.delete(pageToDelete); // Delete from IndexedDB
     pages.splice(index, 1); // Remove from pages array
-
     if (pages.length === 0) {
       addPage(); // Add a new page if all pages are deleted
     } else {
@@ -67,36 +67,53 @@
   }
 </script>
 
-<main>
-  <!-- Sidebar with list of pages -->
-  <aside class="fixed top-0 left-0 z-40 w-60 h-screen">
-    <div class="bg-light-gray overflow-y-auto py-5 px-3 h-full border-r border-gray-200">
-      <ul class="space-y-2">
-        {#each pages as page, index}
-          <li>
-            <button on:click={() => selectPage(index)} class="{index === currentPageIndex ? 'bg-gray-200' : ''} py-2 px-3 text-gray-900 rounded-lg">
-              {page}
-            </button>
-            <button on:click={() => deletePage(index)} class="text-red-500 font-bold">X</button>
-          </li>
-        {/each}
-        <li class="text-center">
-          <button on:click={addPage} class="font-medium">+ New page</button>
+<aside class="fixed top-0 left-0 z-40 w-60 h-screen">
+  <div class="bg-light-gray overflow-y-auto py-5 px-3 h-full border-r border-gray-200">
+    <ul class="space-y-2">
+      {#each pages as page, index}
+        <li>
+          <button on:click={() => selectPage(index)} class="{index === currentPageIndex ? 'bg-gray-200' : ''} py-2 px-3 text-gray-900 rounded-lg">
+            {page}
+          </button>
+          <button on:click={() => deletePage(index)} class="text-red-500 font-bold">X</button>
         </li>
-      </ul>
-    </div>
-  </aside>
+      {/each}
+      <li class="text-center">
+        <button on:click={addPage} class="font-medium">+ New page</button>
+      </li>
+    </ul>
+  </div>
+</aside>
 
-  
-  <main class="p-4 ml-60 h-auto">
-    <div class="grid grid-cols-2 items-center nb-3">
-      <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}></h1>
-      <button class="ml-auto bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm-3 hover:bg-gray-900" on:click={saveNote}>
-        Save
-      </button>
-    </div>
-    <hr />
-    <textarea class="mt-3 block w-full bg-gray-50 border border-gray-300 rounded-lg text-gray-900 p-2.5" bind:value={note}></textarea>
-  </main>
+<main class="p-4 ml-60 h-auto">
+  <div class="grid grid-cols-2 items-center mb-3">
+    <h1 class="text-3xl font-bold" contenteditable bind:textContent={title}></h1>
+    <button class="ml-auto bg-gray-800 text-white px-5 py-2.5 rounded-lg font-medium text-sm hover:bg-gray-900" on:click={saveNote}>
+      Save
+    </button>
+  </div>
+  <hr />
+  <textarea class="mt-3 block w-full bg-gray-50 border border-gray-300 rounded-lg text-gray-900 p-2.5" bind:value={note}></textarea>
 </main>
 
+<style>
+  aside {
+    background-color: #f3f4f6;
+  }
+
+  .bg-gray-200 {
+    background-color: #e5e7eb;
+  }
+
+  .bg-light-gray {
+    background-color: #f9fafb;
+  }
+
+  .text-red-500 {
+    color: #ef4444;
+  }
+
+  .text-gray-900 {
+    color: #111827;
+  }
+</style>
