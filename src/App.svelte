@@ -16,7 +16,7 @@
   });
 
   onDestroy(() => {
-    db.close(); // Close the database connection on component destruction
+    db.close(); 
   });
 
   async function initDatabase() {
@@ -58,7 +58,7 @@
         if (pages.length === 0) {
           addPage(); // If no pages found, add a default page
         } else {
-          selectPage(currentPageIndex); // Select the current page
+          selectPage(currentPageIndex); 
         }
       }
     };
@@ -119,7 +119,7 @@
       if (currentPageIndex >= pages.length) {
         selectPage(pages.length - 1);
       } else {
-        selectPage(currentPageIndex); // Refresh current page after deletion
+        selectPage(currentPageIndex); 
       }
     };
 
@@ -143,23 +143,23 @@
 
 <style>
   .bg-dark {
-    background-color: #121212; /* Dark background */
+    background-color: #121212; 
   }
 
   .text-electric-blue {
-    color: #00c6ff; /* Electrifying blue text */
+    color: #00c6ff; 
   }
 
   .bg-electric-blue {
-    background-color: #00c6ff; /* Electrifying blue background */
+    background-color: #00c6ff; 
   }
 
   .bg-electric-blue:hover {
-    background-color: #0099e0; /* Darker shade on hover */
+    background-color: #0099e0;
   }
 
   .text-electric-blue:hover {
-    color: #0077b3; /* Darker shade on hover */
+    color: #0077b3; 
   }
 
   .sidebar-button {
@@ -180,7 +180,7 @@
   }
 
   main {
-    background: linear-gradient(to bottom, #1e3c72, #2a5298); /* Eye-catching gradient background */
+    background: linear-gradient(to bottom, #1e3c72, #2a5298); 
     height: 100vh;
   }
 
