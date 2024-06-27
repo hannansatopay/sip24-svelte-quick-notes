@@ -54,27 +54,35 @@
   }
 
   function saveNote() {
+
     const transaction = db.transaction(storeName, 'readwrite');
     const objectStore = transaction.objectStore(storeName);
     const storedPageName = pages[currentPageIndex];
     
     if (storedPageName != title) {
+
       objectStore.delete(storedPageName);
       pages[currentPageIndex] = title;
+
     }
+
     objectStore.put({ title, note });
     localStorage.setItem("pages", JSON.stringify(pages));
+
   }
 
   function addPage() {
+
     const newTitle = "New Page";
     pages.push(newTitle);
     selectPage(pages.length - 1);
     saveNote();
+
   }
 
 
   function selectPage(index) {
+
     currentPageIndex = index;
     title = pages[currentPageIndex];
     const transaction = db.transaction(storeName, 'readonly');
@@ -82,6 +90,7 @@
     const request = objectStore.get(title);
     request.onsuccess = function() {
       const result = request.result;
+      
       if (result) {
         note = result.note;
       } else {
