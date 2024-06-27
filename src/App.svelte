@@ -149,7 +149,7 @@
     margin: 0;
     width: 100vw;
     font-family: 'Pixelify Sans', sans-serif;
-    background-image: url('assets/bg.gif') type="image/gif";
+    background-image: url('https://github.com/nav9v/sip24-svelte-quick-notes/blob/nav9v/assets/bg.gif?raw=true');
     background-size: cover;
     background-position: center;
     overflow: hidden;
