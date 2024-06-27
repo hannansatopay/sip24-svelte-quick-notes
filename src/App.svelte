@@ -149,7 +149,7 @@
     margin: 0;
     width: 100vw;
     font-family: 'Pixelify Sans', sans-serif;
-    background-image: url('assets/bg.gif');
+    background-image: url('assets/bg.gif') type="image/gif";
     background-size: cover;
     background-position: center;
     overflow: hidden;
