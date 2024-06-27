@@ -84,11 +84,14 @@
   function selectPage(index) {
 
     currentPageIndex = index;
+
     title = pages[currentPageIndex];
+
     const transaction = db.transaction(storeName, 'readonly');
     const objectStore = transaction.objectStore(storeName);
     const request = objectStore.get(title);
     request.onsuccess = function() {
+
       const result = request.result;
       
       if (result) {
@@ -100,6 +103,7 @@
   }
 
   function deletePage(index) {
+
     if (pages.length === 1) {
       alert('Cannot delete the only page.');
       return;
@@ -111,6 +115,7 @@
     objectStore.delete(deletedPage);
 
     localStorage.setItem('pages', JSON.stringify(pages));
+    
     if (index === currentPageIndex) {
       currentPageIndex = Math.max(0, index - 1);
     }
