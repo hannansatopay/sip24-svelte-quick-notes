@@ -40,16 +40,16 @@
   }
 
   function deletePage(pageIndex) {
-    if (pages.length === 1) return; // Don't allow deleting the last page
+    if (pages.length === 1) return;
 
     const isCurrentPage = pageIndex === currentPageIndex;
     pages.splice(pageIndex, 1);
 
     if (isCurrentPage) {
-      selectPage(pageIndex > 0 ? pageIndex - 1 : 0); // Select previous page if current is deleted
+      selectPage(pageIndex > 0 ? pageIndex - 1 : 0);
     }
 
-    localStorage.removeItem(pages[currentPageIndex]); // Remove old title entry
+    localStorage.removeItem(pages[currentPageIndex]);
     localStorage.setItem("pages", JSON.stringify(pages));
   }
 </script>
@@ -112,7 +112,7 @@
     background: #445ffa;
   }
   .bg-darker-blue {
-    background: #5c08ca;
+    background: #6808e5;
   }
   body {
     font-family: "Times New Roman", serif;
