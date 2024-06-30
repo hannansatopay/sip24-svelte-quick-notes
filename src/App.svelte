@@ -1,6 +1,6 @@
 <script>
     import { onMount } from 'svelte';
-  import { onMount } from 'svelte';
+  import { openDB } from 'idb';
     let pages = [];
     let currentPageIndex = 0;
     let title = '';
