@@ -5,7 +5,7 @@ let currentPageIndex=0;
 let title = '';
 let note = '';
 
- let name="Sumaiya Memon";
+ let name="Sumaiya";
  
  onMount(()=>{
  const savedPages= localStorage.getItem("pages");
