@@ -38,6 +38,18 @@
     title = pages[currentPageindex];
     note = localStorage.getItem(title);
   }
+  function deleteNote() {
+    const titleToDelete = pages[currentPageindex];
+    localStorage.removeItem(titleToDelete);
+    pages.splice(currentPageindex, 1);
+    localStorage.setItem("pages", JSON.stringify(pages));
+    if (pages.length === 0) {
+      addPage();
+    } else {
+      currentPageindex = Math.max(currentPageindex - 1, 0);
+      selectPage(currentPageindex);
+    }
+  }
 </script>
 
 <aside class="fixed top-0 left-0 z-40 w-60 h-screen">
@@ -78,6 +90,11 @@
     class="block w-full bg-gray-50 border-gray-300 rounded-lg text-gray-900 p-2.5 mt-2"
     bind:value={note}
   ></textarea>
+  <button
+    id="delete"
+    class="bg-red-600 ml-auto text-white px-5 py-2.5 rounded-lg font-medium text-sm mt-3 hover:bg-red-700"
+    on:click={deleteNote}>Delete Page</button
+  >
 </main>
 
 <style>
@@ -86,5 +103,8 @@
   }
   .bg-dark-gray {
     background: rgb(217, 223, 225);
+  }
+  #delete {
+    margin-left: 61rem;
   }
 </style>
