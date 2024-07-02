@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "moduleResolution": "bundler",
+    "moduleResolution": "Node",
     "target": "ESNext",
     "module": "ESNext",
     /**
@@ -8,6 +8,21 @@
      * a value or a type, so tell TypeScript to enforce using
      * `import type` instead of `import` for Types.
      */
+     
+   
+     
+       
+        "strict": true,
+     
+        "forceConsistentCasingInFileNames": true,
+        "types": ["@types/dexie"],
+      
+    
+    
+
+
+
+
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "resolveJsonModule": true,
