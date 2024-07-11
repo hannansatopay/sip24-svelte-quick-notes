@@ -9,17 +9,18 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^3.0.2",
+    "@sveltejs/vite-plugin-svelte": "^3.1.1",
     "autoprefixer": "^10.4.19",
     "flowbite": "^2.3.0",
     "flowbite-svelte": "^0.46.1",
-    "postcss": "^8.4.38",
+    "postcss": "^8.4.39",
     "svelte": "^4.2.12",
-    "tailwindcss": "^3.4.3",
+    "tailwindcss": "^3.4.4",
     "vite": "^5.2.0"
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
+    "idb": "^8.0.0",
     "tailwind-merge": "^2.3.0"
   }
 }
