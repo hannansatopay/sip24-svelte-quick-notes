@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "moduleResolution": "bundler",
+    "moduleResolution": "Node",
     "target": "ESNext",
     "module": "ESNext",
     /**
@@ -29,4 +30,5 @@
    * to avoid limiting type declarations.
    */
   "include": ["src/**/*.d.ts", "src/**/*.js", "src/**/*.svelte"]
+  "include": ["src/**/*.d.ts", "src/**/*.js", "src/**/*.svelte","node_modules/idb/index.d.ts"]
 }
