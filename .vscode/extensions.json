@@ -1,3 +1,219 @@
-{
-  "recommendations": ["svelte.svelte-vscode"]
-}
+import { onMount } from 'svelte';
+  import { openDB } from 'idb';
+  let pages = [];
+  let currentPageIndex = 0;
+  let currentTitle = "";
+  let currentNote = "";
+  let db;
+  onMount(async () => {
+    db = await openDB('notes-db', 1, {
+      upgrade(db) {
+        db.createObjectStore('notes');
+      },
+    });
+    const savedPages = await db.get('notes', 'pages');
+    if (savedPages) {
+      pages = savedPages;
+      selectPage(0);
+    } else {
+      addPage();
+    }
+  });
+  async function saveNote() {
+    const storedPageName = pages[currentPageIndex];
+    if (storedPageName != currentTitle) {
+      await db.delete('notes', storedPageName);
+      pages[currentPageIndex] = currentTitle;
+    }
+    await db.put('notes', currentNote, currentTitle);
+    await db.put('notes', pages, 'pages');
+  }
+  function addPage() {
+    const newPageTitle = `New Page ${pages.length + 1}`;
+    pages = [...pages, newPageTitle];
+    selectPage(pages.length - 1);
+  }
+  async function deletePage(index) {
+    const pageTitle = pages[index];
+    await db.delete('notes', pageTitle);
+    pages = pages.filter((_, i) => i !== index);
+    await db.put('notes', pages, 'pages');
+    if (pages.length === 0) {
+      addPage();
+    } else {
+      selectPage(Math.min(index, pages.length - 1));
+    }
+  }
+  async function selectPage(index) {
+    currentPageIndex = index;
+    currentTitle = pages[currentPageIndex];
+    currentNote = await db.get('notes', currentTitle) || "";
+  }
+</script>
+
+<main>
+  Hello World
+</main>
+<div class="app-container">
+  <main class="main-content">
+    <div class="header">
+      <input 
+        type="text" 
+        bind:value={currentTitle} 
+        class="title-input"
+        placeholder="Page Title"
+      />
+      <button class="save-button" on:click={saveNote}>Save Note</button>
+    </div>
+    <textarea
+      class="textarea"
+      placeholder="Write your note here..."
+      bind:value={currentNote}
+    ></textarea>
+  </main>
+
+<style>
+  <aside class="sidebar">
+    <div class="sidebar-content">
+      <ul class="sidebar-list">
+        {#each pages as page, index}
+          <li class="sidebar-item">
+            <button 
+              on:click={() => selectPage(index)} 
+              class="sidebar-button {index === currentPageIndex ? 'bg-dark-grey' : ''}"
+            >
+              {page}
+            </button>
+            <button 
+              on:click={() => deletePage(index)} 
+              class="delete-button"
+              title="Delete page"
+            >
+              ×
+            </button>
+          </li>
+        {/each}
+        <li class="text-center"><button on:click={addPage} class="font-medium">+ Add page</button></li>
+      </ul>
+    </div>
+  </aside>
+</div>
+
+<style> 
+  :global(body) {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+  }
+  .app-container {
+    display: flex;
+    height: 100vh;
+  }
+  .sidebar {
+    width: 200px;
+    background: #e0f7fa;
+    border-right: 1px solid #b2ebf2;
+    overflow-y: auto;
+  }
+  .sidebar-content {
+    padding: 20px;
+  }
+  .sidebar-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .sidebar-button {
+    background: #80deea;
+    padding: 10px 15px;
+    border-radius: 8px;
+    width: 100%;
+    text-align: left;
+    border: 1px solid #4dd0e1;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    flex-grow: 1;
+    margin-bottom: 0;
+  }
+  .sidebar-button:hover {
+    background-color: #4dd0e1;
+  }
+  .delete-button {
+    background-color: #e57373;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    margin-left: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+  }
+  .delete-button:hover {
+    background-color: #ef5350;
+  }
+  .main-content {
+    flex-grow: 1;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .title-input {
+    font-size: 24px;
+    font-weight: bold;
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 70%;
+  }
+  .save-button {
+    background-color: #558fd2;
+    color: rgb(255, 255, 255);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  .save-button:hover {
+    background-color: #88b9e4;
+  }
+  .textarea {
+    width: 100%;
+    height: 300px;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    font-size: 16px;
+    resize: vertical;
+    margin-top: 10px;
+    box-sizing:border-box;
+  }
+  .text-center {
+    text-align: center;
+  }
+  .font-medium {
+    font-weight: 500;
+  }
+</style>
+Footer
