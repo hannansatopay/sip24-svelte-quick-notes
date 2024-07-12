@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
+    "idb": "^8.0.0",
     "tailwind-merge": "^2.3.0"
   }
 }
