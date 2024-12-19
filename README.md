@@ -1,3 +1,16 @@
+# Link to the web app
+
+[SvelteScribe](https://sveltescribe.vercel.app/) 
+
+## Description of the project
+- Developed as part of Summer Internship Program offered by Craftlab.
+- The application provides the ability to add a note by mentioning the title and the details for the note.
+- Also provides the ability to delete and edit a particular note.
+- The application makes use of Dexie.js as the wrapper for IndexedDB for storing the notes instead of localStorage.
+- Makes use of Tailwind CSS for responsiveness of the application.
+
+## Introduction
+
 We are excited to welcome you to the Svelte Fundamentals course, a key part of the Summer Internship Program 2024. In this tutorial, you'll learn the basics of Svelte by building a simple note application. This project will help you understand the core concepts of Svelte while creating a functional quick notes app.
 
 ## How to Contribute
